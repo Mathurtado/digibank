@@ -15,13 +15,39 @@
 function inicializarOperaciones() {
   document.getElementById("consignar-formulario").addEventListener("submit", (evento) => {
     evento.preventDefault();
-    // TODO (Juan, rama 12)
-    mostrarMensaje(crearRespuesta("advertencia", "Consignar: en construcción"));
+
+    const cuenta = obtenerCuentaSeleccionada();
+    if (cuenta === null) {
+      mostrarMensaje(crearRespuesta("error", "Inicia sesión para hacer operaciones."));
+      return;
+    }
+
+    const campo = document.getElementById("consignar-monto");
+    const monto = convertirMonto(campo.value);
+    const respuesta = cuenta.consignar(monto);
+
+    mostrarMensaje(respuesta);
+    if (respuesta.tipo === "exito") {
+      campo.value = "";
+    }
   });
 
   document.getElementById("retirar-formulario").addEventListener("submit", (evento) => {
     evento.preventDefault();
-    // TODO (Juan, rama 13)
-    mostrarMensaje(crearRespuesta("advertencia", "Retirar: en construcción"));
+
+    const cuenta = obtenerCuentaSeleccionada();
+    if (cuenta === null) {
+      mostrarMensaje(crearRespuesta("error", "Inicia sesión para hacer operaciones."));
+      return;
+    }
+
+    const campo = document.getElementById("retirar-monto");
+    const monto = convertirMonto(campo.value);
+    const respuesta = cuenta.retirar(monto);
+
+    mostrarMensaje(respuesta);
+    if (respuesta.tipo === "exito") {
+      campo.value = "";
+    }
   });
 }

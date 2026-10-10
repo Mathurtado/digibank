@@ -27,23 +27,67 @@ class Cuenta {
 
   /**
    * Suma dinero a la cuenta.
-   * Debe: validar monto > 0, sumar, registrar movimiento "consignacion".
-   * Devuelve: crearRespuesta(...)
+   * Devuelve: crearRespuesta(tipo, mensaje, { saldo })
    */
   consignar(monto) {
-    // TODO (Juan, rama 12-consignar-dinero)
-    return crearRespuesta("advertencia", "Consignar: en construcción");
+    // Paso 1: validar el monto. Si no es válido, no se toca nada.
+    const error = this.#validarMonto(monto);
+    if (error !== null) {
+      return error;
+    }
+
+    // Paso 2: sumar al saldo
+    this.#saldo = this.#saldo + monto;
+
+    // Paso 3: registrar el movimiento (solo después de que todo salió bien)
+    this.#registrarMovimiento("consignacion", monto);
+
+    return crearRespuesta(
+      "exito",
+      "Consignación exitosa por " + formatearMoneda(monto) + ". Nuevo saldo: " + formatearMoneda(this.#saldo) + ".",
+      { saldo: this.#saldo }
+    );
   }
 
   /**
    * Resta dinero de la cuenta.
-   * Debe: validar monto > 0, validar monto <= limiteRetiro(),
-   * aplicar calcularInteresRetiro(monto), restar, registrar movimiento "retiro".
-   * Devuelve: crearRespuesta(...)
+   * Devuelve: crearRespuesta(tipo, mensaje, { saldo })
+   *
+   * POLIMORFISMO: este método es el mismo para todas las cuentas, pero
+   * llama a limiteRetiro() y calcularInteresRetiro(), que cada clase hija
+   * redefine. Así, ahorros y corriente se comportan distinto sin repetir código.
    */
   retirar(monto) {
-    // TODO (Juan, rama 13-retirar-dinero)
-    return crearRespuesta("advertencia", "Retirar: en construcción");
+    // Paso 1: validar el monto
+    const error = this.#validarMonto(monto);
+    if (error !== null) {
+      return error;
+    }
+
+    // Paso 2: calcular el interés (depende del tipo de cuenta).
+    // PENDIENTE (profesor): si el 1,5 % es un rendimiento y no un cobro,
+    // aquí cambia el signo. Hoy calcularInteresRetiro() devuelve 0.
+    const interes = this.calcularInteresRetiro(monto);
+    const totalADescontar = monto + interes;
+
+    // Paso 3: revisar el límite (depende del tipo de cuenta)
+    const limite = this.limiteRetiro();
+    if (totalADescontar > limite) {
+      return crearRespuesta(
+        "error",
+        "Saldo insuficiente. Puedes retirar hasta " + formatearMoneda(Math.max(limite, 0)) + "."
+      );
+    }
+
+    // Paso 4: descontar y registrar (solo si todo salió bien)
+    this.#saldo = this.#saldo - totalADescontar;
+    this.#registrarMovimiento("retiro", totalADescontar);
+
+    return crearRespuesta(
+      "exito",
+      "Retiro exitoso por " + formatearMoneda(monto) + ". Nuevo saldo: " + formatearMoneda(this.#saldo) + ".",
+      { saldo: this.#saldo }
+    );
   }
 
   // Método polimórfico: cuánto se puede retirar como máximo.
@@ -69,6 +113,28 @@ class Cuenta {
   // validar. Así nadie puede agregar un movimiento falso desde afuera.
   // Movimiento: { fecha, tipo, valor, saldoResultante }
   #registrarMovimiento(tipo, valor) {
-    // TODO (Juan)
+    this.#movimientos.push({
+      fecha: new Date(),
+      tipo: tipo,
+      valor: valor,
+      saldoResultante: this.#saldo, // el saldo ya actualizado
+    });
+  }
+
+  // Privado: revisa que el monto sea un número entero mayor que 0.
+  // Lo usan consignar() y retirar(). Devuelve una respuesta de error, o null.
+  // Se valida aquí aunque la interfaz ya use convertirMonto(), porque la
+  // clase no debe confiar en quien la llama (por ejemplo, desde la consola).
+  #validarMonto(monto) {
+    if (typeof monto !== "number" || Number.isNaN(monto)) {
+      return crearRespuesta("error", "Ingresa un monto válido.");
+    }
+    if (!Number.isInteger(monto)) {
+      return crearRespuesta("error", "El monto debe ser un número entero, sin decimales.");
+    }
+    if (monto <= 0) {
+      return crearRespuesta("error", "El monto debe ser mayor que $0.");
+    }
+    return null;
   }
 }
