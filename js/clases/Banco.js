@@ -218,12 +218,65 @@ class Banco {
   // ---------- Inicio de sesión (Mateo, rama 6-iniciar-sesion) ----------
 
   /**
-   * Valida bloqueo, credenciales e intentos.
-   * Devuelve: crearRespuesta(tipo, mensaje, { intentosRestantes })
+   * Valida campos, bloqueo, credenciales e intentos.
+   * Devuelve: crearRespuesta(tipo, mensaje, datos)
+   *   datos = { intentosRestantes } solo cuando el usuario existe,
+   *   para que la interfaz muestre el contador. Si no existe, datos = null.
    */
   iniciarSesion(usuario, contrasena) {
-    // TODO (Mateo)
-    return crearRespuesta("advertencia", "Inicio de sesión: en construcción");
+    const textoUsuario = String(usuario || "").trim();
+    const textoContrasena = String(contrasena || "");
+
+    // Paso 1: campos vacíos. No cuenta como intento fallido.
+    if (textoUsuario === "" || textoContrasena === "") {
+      return crearRespuesta("error", "Ingresa tu usuario y contraseña.");
+    }
+
+    // Paso 2: buscar al cliente. Si no existe, el mensaje es el MISMO
+    // que con contraseña incorrecta, para no revelar qué usuarios existen.
+    const cliente = this.buscarPorUsuario(textoUsuario);
+    if (cliente === null) {
+      return crearRespuesta("error", "Usuario o contraseña incorrectos.");
+    }
+
+    // Paso 3: si está bloqueado, no se revisa la contraseña ni se suman intentos.
+    if (cliente.estaBloqueado()) {
+      return this.#respuestaBloqueo(cliente);
+    }
+
+    // Paso 4: contraseña incorrecta. Se suma el intento.
+    if (!cliente.verificarContrasena(textoContrasena)) {
+      cliente.registrarIntentoFallido();
+
+      // Si con este intento llegó al máximo, se avisa del bloqueo de inmediato
+      if (cliente.estaBloqueado()) {
+        return this.#respuestaBloqueo(cliente);
+      }
+
+      return crearRespuesta("error", "Usuario o contraseña incorrectos.", {
+        intentosRestantes: MAX_INTENTOS - cliente.intentosFallidos,
+      });
+    }
+
+    // Paso 5: todo bien. Se reinicia el contador y se abre la sesión.
+    cliente.reiniciarIntentos();
+    this.clienteActivo = cliente;
+    return crearRespuesta("exito", "Bienvenido, " + cliente.nombreCompleto + ".", {
+      intentosRestantes: MAX_INTENTOS,
+    });
+  }
+
+  // Arma el mensaje de cuenta bloqueada con los minutos que faltan,
+  // redondeados hacia arriba (4 min 10 s -> "5 minutos").
+  #respuestaBloqueo(cliente) {
+    const milisegundosRestantes = cliente.bloqueadoHasta - Date.now();
+    const minutos = Math.ceil(milisegundosRestantes / 60000);
+    const palabra = minutos === 1 ? "minuto" : "minutos";
+    return crearRespuesta(
+      "error",
+      "Cuenta bloqueada por demasiados intentos. Intenta de nuevo en " + minutos + " " + palabra + ".",
+      { intentosRestantes: 0 }
+    );
   }
 
   cerrarSesion() {
