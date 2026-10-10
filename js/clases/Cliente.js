@@ -11,6 +11,7 @@ class Cliente {
     this.identificacion = datos.identificacion; // texto, no número
     this.nombreCompleto = datos.nombreCompleto;
     this.celular = datos.celular;               // texto, para no perder el formato
+    this.correo = datos.correo;                 // ya normalizado en minúsculas
     this.usuario = datos.usuario;               // ya normalizado en minúsculas
     this.#contrasena = datos.contrasena;        // privada: nunca se muestra
     this.intentosFallidos = 0;
