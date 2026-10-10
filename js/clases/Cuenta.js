@@ -27,24 +27,26 @@ class Cuenta {
 
   /**
    * Suma dinero a la cuenta.
-   * Debe: validar monto > 0, sumar, registrar movimiento "consignacion".
-   * Devuelve: crearRespuesta(...)
+   * Devuelve: crearRespuesta(tipo, mensaje, { saldo })
    */
   consignar(monto) {
-    // Validación del monto: solo enteros positivos.
-    if (!Number.isInteger(monto) || monto <= 0) {
-      return crearRespuesta("error", "Ingresa un monto entero mayor que cero.");
+    // Paso 1: validar el monto. Si no es válido, no se toca nada.
+    const error = this.#validarMonto(monto);
+    if (error !== null) {
+      return error;
     }
 
-    // Evita overflow o valores no seguros por cálculo matemático.
-    const saldoNuevo = this.#saldo + monto;
-    if (!Number.isSafeInteger(saldoNuevo)) {
-      return crearRespuesta("error", "El monto supera el límite permitido.");
-    }
+    // Paso 2: sumar al saldo
+    this.#saldo = this.#saldo + monto;
 
-    this.#saldo = saldoNuevo;
+    // Paso 3: registrar el movimiento (solo después de que todo salió bien)
     this.#registrarMovimiento("consignacion", monto);
-    return crearRespuesta("exito", "Consignación realizada correctamente.");
+
+    return crearRespuesta(
+      "exito",
+      "Consignación exitosa por " + formatearMoneda(monto) + ". Nuevo saldo: " + formatearMoneda(this.#saldo) + ".",
+      { saldo: this.#saldo }
+    );
   }
 
   /**
@@ -54,27 +56,8 @@ class Cuenta {
    * Devuelve: crearRespuesta(...)
    */
   retirar(monto) {
-    // Validación básica del monto de retiro.
-    if (!Number.isInteger(monto) || monto <= 0) {
-      return crearRespuesta("error", "Ingresa un monto entero mayor que cero.");
-    }
-
-    // El interés puede ser 0 en la cuenta base, pero las hijas lo redefinen.
-    const interes = this.calcularInteresRetiro(monto);
-    const montoTotal = monto + interes;
-
-    // Restricción general del método polimórfico.
-    // La cuenta corriente usa un límite mayor por sobregiro.
-    if (montoTotal > this.limiteRetiro()) {
-      const mensaje = this.tipo === "corriente"
-        ? "El retiro supera el saldo y el sobregiro permitido."
-        : "No tienes saldo suficiente en tu cuenta de ahorros.";
-      return crearRespuesta("error", mensaje);
-    }
-
-    this.#saldo -= montoTotal;
-    this.#registrarMovimiento("retiro", monto, interes);
-    return crearRespuesta("exito", "Retiro realizado correctamente.");
+    // TODO (Juan, rama 13-retirar-dinero)
+    return crearRespuesta("advertencia", "Retirar: en construcción");
   }
 
   // Método polimórfico: cuánto se puede retirar como máximo.
@@ -92,40 +75,36 @@ class Cuenta {
   // Devuelve una COPIA de los movimientos, del más reciente al más antiguo.
   // Es una copia para que nadie pueda modificar el historial desde afuera.
   obtenerMovimientos() {
-    return [...this.#movimientos].sort((a, b) => {
-      return new Date(b.fechaHora) - new Date(a.fechaHora);
-    });
-  }
-
-  // Método auxiliar para consultar el saldo sin romper el encapsulamiento.
-  consultarSaldo() {
-    if (!Number.isSafeInteger(this.#saldo)) {
-      return crearRespuesta("error", "El saldo de la cuenta no es válido.");
-    }
-
-    return crearRespuesta("exito", "Saldo consultado correctamente.", {
-      tipoCuenta: this.tipo,
-      numeroCuenta: this.numero,
-      saldo: this.#saldo,
-      fechaHora: new Date().toISOString()
-    });
-  }
-
-  // Método auxiliar para obtener los movimientos en orden cronológico inverso.
-  consultarMovimientos() {
-    return this.obtenerMovimientos();
+    // TODO (Sebastián/Juan): ordenar del más reciente al más antiguo
+    return [...this.#movimientos];
   }
 
   // Privado (#): solo consignar() y retirar() pueden llamarlo, después de
   // validar. Así nadie puede agregar un movimiento falso desde afuera.
-  // Movimiento: { fechaHora, tipo, valor, saldoResultante, interes }
-  #registrarMovimiento(tipo, valor, interes = 0) {
+  // Movimiento: { fecha, tipo, valor, saldoResultante }
+  #registrarMovimiento(tipo, valor) {
     this.#movimientos.push({
-      fechaHora: new Date().toISOString(),
+      fecha: new Date(),
       tipo: tipo,
       valor: valor,
-      interes: interes,
-      saldoResultante: this.#saldo
+      saldoResultante: this.#saldo, // el saldo ya actualizado
     });
+  }
+
+  // Privado: revisa que el monto sea un número entero mayor que 0.
+  // Lo usan consignar() y retirar(). Devuelve una respuesta de error, o null.
+  // Se valida aquí aunque la interfaz ya use convertirMonto(), porque la
+  // clase no debe confiar en quien la llama (por ejemplo, desde la consola).
+  #validarMonto(monto) {
+    if (typeof monto !== "number" || Number.isNaN(monto)) {
+      return crearRespuesta("error", "Ingresa un monto válido.");
+    }
+    if (!Number.isInteger(monto)) {
+      return crearRespuesta("error", "El monto debe ser un número entero, sin decimales.");
+    }
+    if (monto <= 0) {
+      return crearRespuesta("error", "El monto debe ser mayor que $0.");
+    }
+    return null;
   }
 }
