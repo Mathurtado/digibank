@@ -10,9 +10,9 @@ class CuentaAhorros extends Cuenta {
 
   // POLIMORFISMO: redefine el interés que aplica la clase padre.
   // Regla: 1,5 % mensual al retirar (TASA_INTERES_AHORROS).
-  // PENDIENTE (profesor): ¿se suma o se descuenta? ¿sobre el saldo o
-  // sobre el monto retirado? Hasta saberlo, devuelve 0.
+  // Se aplica sobre el monto retirado y se descuenta del saldo final.
+  // Ejemplo: retirar $100.000 => interés de $1.500.
   calcularInteresRetiro(monto) {
-    return 0;
+    return Math.round(monto * TASA_INTERES_AHORROS);
   }
 }

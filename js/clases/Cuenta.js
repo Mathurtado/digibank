@@ -31,8 +31,20 @@ class Cuenta {
    * Devuelve: crearRespuesta(...)
    */
   consignar(monto) {
-    // TODO (Juan, rama 12-consignar-dinero)
-    return crearRespuesta("advertencia", "Consignar: en construcción");
+    // Validación del monto: solo enteros positivos.
+    if (!Number.isInteger(monto) || monto <= 0) {
+      return crearRespuesta("error", "Ingresa un monto entero mayor que cero.");
+    }
+
+    // Evita overflow o valores no seguros por cálculo matemático.
+    const saldoNuevo = this.#saldo + monto;
+    if (!Number.isSafeInteger(saldoNuevo)) {
+      return crearRespuesta("error", "El monto supera el límite permitido.");
+    }
+
+    this.#saldo = saldoNuevo;
+    this.#registrarMovimiento("consignacion", monto);
+    return crearRespuesta("exito", "Consignación realizada correctamente.");
   }
 
   /**
@@ -42,8 +54,27 @@ class Cuenta {
    * Devuelve: crearRespuesta(...)
    */
   retirar(monto) {
-    // TODO (Juan, rama 13-retirar-dinero)
-    return crearRespuesta("advertencia", "Retirar: en construcción");
+    // Validación básica del monto de retiro.
+    if (!Number.isInteger(monto) || monto <= 0) {
+      return crearRespuesta("error", "Ingresa un monto entero mayor que cero.");
+    }
+
+    // El interés puede ser 0 en la cuenta base, pero las hijas lo redefinen.
+    const interes = this.calcularInteresRetiro(monto);
+    const montoTotal = monto + interes;
+
+    // Restricción general del método polimórfico.
+    // La cuenta corriente usa un límite mayor por sobregiro.
+    if (montoTotal > this.limiteRetiro()) {
+      const mensaje = this.tipo === "corriente"
+        ? "El retiro supera el saldo y el sobregiro permitido."
+        : "No tienes saldo suficiente en tu cuenta de ahorros.";
+      return crearRespuesta("error", mensaje);
+    }
+
+    this.#saldo -= montoTotal;
+    this.#registrarMovimiento("retiro", monto, interes);
+    return crearRespuesta("exito", "Retiro realizado correctamente.");
   }
 
   // Método polimórfico: cuánto se puede retirar como máximo.
@@ -61,14 +92,40 @@ class Cuenta {
   // Devuelve una COPIA de los movimientos, del más reciente al más antiguo.
   // Es una copia para que nadie pueda modificar el historial desde afuera.
   obtenerMovimientos() {
-    // TODO (Sebastián/Juan): ordenar del más reciente al más antiguo
-    return [...this.#movimientos];
+    return [...this.#movimientos].sort((a, b) => {
+      return new Date(b.fechaHora) - new Date(a.fechaHora);
+    });
+  }
+
+  // Método auxiliar para consultar el saldo sin romper el encapsulamiento.
+  consultarSaldo() {
+    if (!Number.isSafeInteger(this.#saldo)) {
+      return crearRespuesta("error", "El saldo de la cuenta no es válido.");
+    }
+
+    return crearRespuesta("exito", "Saldo consultado correctamente.", {
+      tipoCuenta: this.tipo,
+      numeroCuenta: this.numero,
+      saldo: this.#saldo,
+      fechaHora: new Date().toISOString()
+    });
+  }
+
+  // Método auxiliar para obtener los movimientos en orden cronológico inverso.
+  consultarMovimientos() {
+    return this.obtenerMovimientos();
   }
 
   // Privado (#): solo consignar() y retirar() pueden llamarlo, después de
   // validar. Así nadie puede agregar un movimiento falso desde afuera.
-  // Movimiento: { fecha, tipo, valor, saldoResultante }
-  #registrarMovimiento(tipo, valor) {
-    // TODO (Juan)
+  // Movimiento: { fechaHora, tipo, valor, saldoResultante, interes }
+  #registrarMovimiento(tipo, valor, interes = 0) {
+    this.#movimientos.push({
+      fechaHora: new Date().toISOString(),
+      tipo: tipo,
+      valor: valor,
+      interes: interes,
+      saldoResultante: this.#saldo
+    });
   }
 }
