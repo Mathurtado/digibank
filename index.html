@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Plata — Sistema Bancario</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+  <!-- ===== Encabezado y menú (visible en todas las secciones) ===== -->
+  <header class="encabezado">
+    <h1 class="marca">Mi Plata</h1>
+    <nav id="menu-publico" class="menu">
+      <button type="button" data-ir-a="seccion-inicio">Inicio</button>
+      <button type="button" data-ir-a="seccion-login">Iniciar sesión</button>
+      <button type="button" data-ir-a="seccion-registro">Registrarse</button>
+    </nav>
+  </header>
+
+  <!-- Mensajes de retroalimentación: éxito, error o advertencia -->
+  <div id="mensaje" class="mensaje oculto" role="status"></div>
+
+  <main>
+
+    <!-- ===== Landing (Sebastián, rama 32 / landing) ===== -->
+    <section id="seccion-inicio" class="seccion">
+      <h2>Bienvenido a Mi Plata</h2>
+      <p>Presentación institucional del banco. (Sebastián)</p>
+    </section>
+
+    <!-- ===== Registro (Mateo, rama 4-registrar-clientes) ===== -->
+    <section id="seccion-registro" class="seccion oculto">
+      <h2>Registro de clientes</h2>
+      <form id="registro-formulario" novalidate>
+        <label for="registro-tipo-documento">Tipo de documento</label>
+        <select id="registro-tipo-documento">
+          <option value="cedula">Cédula</option>
+          <option value="pasaporte">Pasaporte</option>
+        </select>
+
+        <label for="registro-identificacion">Número de documento</label>
+        <input type="text" id="registro-identificacion" autocomplete="off">
+
+        <label for="registro-nombre">Nombre completo</label>
+        <input type="text" id="registro-nombre" autocomplete="name">
+
+        <label for="registro-celular">Celular</label>
+        <input type="text" id="registro-celular" inputmode="numeric" maxlength="10" autocomplete="tel">
+
+        <label for="registro-usuario">Nombre de usuario</label>
+        <input type="text" id="registro-usuario" autocomplete="username">
+
+        <label for="registro-contrasena">Contraseña</label>
+        <input type="password" id="registro-contrasena" autocomplete="new-password">
+
+        <label for="registro-confirmacion">Confirmar contraseña</label>
+        <input type="password" id="registro-confirmacion" autocomplete="new-password">
+
+        <fieldset>
+          <legend>Tipo de cuenta</legend>
+          <label><input type="checkbox" id="registro-cuenta-ahorros" value="ahorros"> Ahorros</label>
+          <label><input type="checkbox" id="registro-cuenta-corriente" value="corriente"> Corriente</label>
+        </fieldset>
+
+        <button type="submit" class="boton-principal">Registrarme</button>
+      </form>
+    </section>
+
+    <!-- ===== Inicio de sesión (Mateo, rama 6-iniciar-sesion) ===== -->
+    <section id="seccion-login" class="seccion oculto">
+      <h2>Iniciar sesión</h2>
+      <form id="login-formulario" novalidate>
+        <label for="login-usuario">Nombre de usuario</label>
+        <input type="text" id="login-usuario" autocomplete="username">
+
+        <label for="login-contrasena">Contraseña</label>
+        <input type="password" id="login-contrasena" autocomplete="current-password">
+
+        <!-- Contador visible de intentos (lo pide el profesor) -->
+        <p id="login-intentos" class="oculto"></p>
+
+        <button type="submit" class="boton-principal">Entrar</button>
+      </form>
+    </section>
+
+    <!-- ===== Panel de transacciones (requiere sesión) ===== -->
+    <section id="seccion-panel" class="seccion oculto">
+      <h2>Hola, <span id="panel-nombre"></span></h2>
+
+      <label for="panel-cuenta">Cuenta</label>
+      <select id="panel-cuenta"></select>
+
+      <nav class="menu-panel">
+        <button type="button" data-ver="vista-saldo">Consultar saldo</button>
+        <button type="button" data-ver="vista-consignar">Consignar</button>
+        <button type="button" data-ver="vista-retirar">Retirar</button>
+        <button type="button" data-ver="vista-movimientos">Movimientos</button>
+        <button type="button" id="panel-cerrar-sesion">Cerrar sesión</button>
+      </nav>
+
+      <!-- Consultar saldo (Sebastián, rama 11) -->
+      <div id="vista-saldo" class="vista oculto">
+        <h3>Saldo</h3>
+        <p id="saldo-valor"></p>
+      </div>
+
+      <!-- Consignar (Juan, rama 12) -->
+      <div id="vista-consignar" class="vista oculto">
+        <h3>Consignar dinero</h3>
+        <form id="consignar-formulario" novalidate>
+          <label for="consignar-monto">Monto</label>
+          <input type="text" id="consignar-monto" class="campo-monto" inputmode="numeric" autocomplete="off">
+          <button type="submit" class="boton-principal">Consignar</button>
+        </form>
+      </div>
+
+      <!-- Retirar (Juan, rama 13) -->
+      <div id="vista-retirar" class="vista oculto">
+        <h3>Retirar dinero</h3>
+        <form id="retirar-formulario" novalidate>
+          <label for="retirar-monto">Monto</label>
+          <input type="text" id="retirar-monto" class="campo-monto" inputmode="numeric" autocomplete="off">
+          <button type="submit" class="boton-principal">Retirar</button>
+        </form>
+      </div>
+
+      <!-- Movimientos (Sebastián, rama 32) -->
+      <div id="vista-movimientos" class="vista oculto">
+        <h3>Movimientos</h3>
+        <ul id="movimientos-lista"></ul>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="pie">
+    <p>© Mi Plata — Proyecto académico CESDE</p>
+  </footer>
+
+  <!-- ===== Scripts: el ORDEN importa (ver contrato) ===== -->
+  <script src="js/utilidades.js"></script>
+  <script src="js/clases/Cuenta.js"></script>
+  <script src="js/clases/CuentaAhorros.js"></script>
+  <script src="js/clases/CuentaCorriente.js"></script>
+  <script src="js/clases/Cliente.js"></script>
+  <script src="js/clases/Banco.js"></script>
+  <script src="js/interfaz/registro.js"></script>
+  <script src="js/interfaz/iniciarSesion.js"></script>
+  <script src="js/interfaz/operaciones.js"></script>
+  <script src="js/interfaz/consultas.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
