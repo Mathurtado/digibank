@@ -11,6 +11,7 @@ class Cliente {
     this.identificacion = datos.identificacion; // texto, no número
     this.nombreCompleto = datos.nombreCompleto;
     this.celular = datos.celular;               // texto, para no perder el formato
+    this.correo = datos.correo;                 // ya normalizado en minúsculas
     this.usuario = datos.usuario;               // ya normalizado en minúsculas
     this.#contrasena = datos.contrasena;        // privada: nunca se muestra
     this.intentosFallidos = 0;
@@ -20,26 +21,40 @@ class Cliente {
 
   // ---------- Inicio de sesión (Mateo, rama 6-iniciar-sesion) ----------
 
-  // Devuelve true o false. La contraseña nunca sale de la clase.
+  // Devuelve true o false. La contraseña nunca sale de la clase:
+  // desde afuera solo se puede preguntar si un texto coincide.
   verificarContrasena(texto) {
-    // TODO (Mateo)
-    return false;
+    return this.#contrasena === texto;
   }
 
-  // true si el bloqueo sigue vigente. Si ya venció, reinicia el contador.
+  // true si el bloqueo sigue vigente.
+  // Si el bloqueo ya venció, lo quita y reinicia el contador.
   estaBloqueado() {
-    // TODO (Mateo)
+    if (this.bloqueadoHasta === null) {
+      return false;
+    }
+    if (Date.now() < this.bloqueadoHasta) {
+      return true;
+    }
+    // Ya pasaron los minutos de bloqueo: la cuenta queda libre otra vez
+    this.bloqueadoHasta = null;
+    this.intentosFallidos = 0;
     return false;
   }
 
-  // Suma un intento y bloquea al llegar a MAX_INTENTOS.
+  // Suma un intento fallido. Al llegar a MAX_INTENTOS, bloquea la cuenta
+  // durante MINUTOS_BLOQUEO (60.000 milisegundos = 1 minuto).
   registrarIntentoFallido() {
-    // TODO (Mateo)
+    this.intentosFallidos++;
+    if (this.intentosFallidos >= MAX_INTENTOS) {
+      this.bloqueadoHasta = Date.now() + MINUTOS_BLOQUEO * 60000;
+    }
   }
 
   // Pone el contador en 0 tras un inicio de sesión correcto.
   reiniciarIntentos() {
-    // TODO (Mateo)
+    this.intentosFallidos = 0;
+    this.bloqueadoHasta = null;
   }
 
   // ---------- Cuentas (listo en el esqueleto: lo usan todos) ----------

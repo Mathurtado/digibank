@@ -25,6 +25,9 @@ function inicializarLogin() {
 
     mostrarMensaje(respuesta);
 
+    // Tras un error se borra la contraseña, para que se escriba de nuevo
+    document.getElementById("login-contrasena").value = "";
+
     // Contador visible: solo aparece si Banco informa los intentos restantes
     // (es decir, si el usuario existe). Limitación documentada en el contrato.
     if (respuesta.datos !== null && respuesta.datos.intentosRestantes !== undefined) {

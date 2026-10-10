@@ -24,6 +24,7 @@ function inicializarRegistro() {
       identificacion: document.getElementById("registro-identificacion").value,
       nombreCompleto: document.getElementById("registro-nombre").value,
       celular: document.getElementById("registro-celular").value,
+      correo: document.getElementById("registro-correo").value,
       usuario: document.getElementById("registro-usuario").value,
       contrasena: document.getElementById("registro-contrasena").value,
       confirmacion: document.getElementById("registro-confirmacion").value,
