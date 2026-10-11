@@ -34,7 +34,20 @@ function inicializarOperaciones() {
 
   document.getElementById("retirar-formulario").addEventListener("submit", (evento) => {
     evento.preventDefault();
-    // TODO (Juan, rama 13)
-    mostrarMensaje(crearRespuesta("advertencia", "Retirar: en construcción"));
+
+    const cuenta = obtenerCuentaSeleccionada();
+    if (cuenta === null) {
+      mostrarMensaje(crearRespuesta("error", "Inicia sesión para hacer operaciones."));
+      return;
+    }
+
+    const campo = document.getElementById("retirar-monto");
+    const monto = convertirMonto(campo.value);
+    const respuesta = cuenta.retirar(monto);
+
+    mostrarMensaje(respuesta);
+    if (respuesta.tipo === "exito") {
+      campo.value = "";
+    }
   });
 }

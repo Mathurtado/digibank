@@ -51,13 +51,43 @@ class Cuenta {
 
   /**
    * Resta dinero de la cuenta.
-   * Debe: validar monto > 0, validar monto <= limiteRetiro(),
-   * aplicar calcularInteresRetiro(monto), restar, registrar movimiento "retiro".
-   * Devuelve: crearRespuesta(...)
+   * Devuelve: crearRespuesta(tipo, mensaje, { saldo })
+   *
+   * POLIMORFISMO: este método es el mismo para todas las cuentas, pero
+   * llama a limiteRetiro() y calcularInteresRetiro(), que cada clase hija
+   * redefine. Así, ahorros y corriente se comportan distinto sin repetir código.
    */
   retirar(monto) {
-    // TODO (Juan, rama 13-retirar-dinero)
-    return crearRespuesta("advertencia", "Retirar: en construcción");
+    // Paso 1: validar el monto
+    const error = this.#validarMonto(monto);
+    if (error !== null) {
+      return error;
+    }
+
+    // Paso 2: calcular el interés (depende del tipo de cuenta).
+    // PENDIENTE (profesor): si el 1,5 % es un rendimiento y no un cobro,
+    // aquí cambia el signo. Hoy calcularInteresRetiro() devuelve 0.
+    const interes = this.calcularInteresRetiro(monto);
+    const totalADescontar = monto + interes;
+
+    // Paso 3: revisar el límite (depende del tipo de cuenta)
+    const limite = this.limiteRetiro();
+    if (totalADescontar > limite) {
+      return crearRespuesta(
+        "error",
+        "Saldo insuficiente. Puedes retirar hasta " + formatearMoneda(Math.max(limite, 0)) + "."
+      );
+    }
+
+    // Paso 4: descontar y registrar (solo si todo salió bien)
+    this.#saldo = this.#saldo - totalADescontar;
+    this.#registrarMovimiento("retiro", totalADescontar);
+
+    return crearRespuesta(
+      "exito",
+      "Retiro exitoso por " + formatearMoneda(monto) + ". Nuevo saldo: " + formatearMoneda(this.#saldo) + ".",
+      { saldo: this.#saldo }
+    );
   }
 
   // Método polimórfico: cuánto se puede retirar como máximo.

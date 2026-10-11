@@ -11,14 +11,13 @@ class CuentaCorriente extends Cuenta {
   // POLIMORFISMO: redefine el límite de retiro de la clase padre.
   // Regla: saldo + 20 % (PORCENTAJE_SOBREGIRO).
   // Ejemplo: con $1.000.000 se pueden retirar hasta $1.200.000.
-  // Nota: si el saldo ya es negativo, por ahora se conserva el saldo actual
-  // para no ampliar artificialmente la deuda. El profesor puede definir luego
-  // la política exacta del sobregiro en ese caso.
+  // PENDIENTE (profesor): ¿qué pasa si el saldo ya es negativo?
+  // Decisión provisional: no se permite retirar más (límite 0).
+  // Se redondea hacia abajo para que los montos sigan siendo enteros.
   limiteRetiro() {
     if (this.saldo <= 0) {
-      return this.saldo;
+      return 0;
     }
-
-    return this.saldo + Math.floor(this.saldo * PORCENTAJE_SOBREGIRO);
+    return Math.floor(this.saldo * (1 + PORCENTAJE_SOBREGIRO));
   }
 }
