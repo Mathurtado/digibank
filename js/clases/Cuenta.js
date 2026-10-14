@@ -103,10 +103,15 @@ class Cuenta {
   }
 
   // Devuelve una COPIA de los movimientos, del más reciente al más antiguo.
-  // Es una copia para que nadie pueda modificar el historial desde afuera.
+  // Se copia cada movimiento (y su fecha), no solo el arreglo: así nadie
+  // puede cambiar el historial desde afuera (encapsulamiento).
+  // Se invierte antes de ordenar porque se guardan en orden de llegada:
+  // si dos movimientos tienen la misma fecha, sale primero el último.
   obtenerMovimientos() {
-    // TODO (Sebastián/Juan): ordenar del más reciente al más antiguo
-    return [...this.#movimientos];
+    return this.#movimientos
+      .map((movimiento) => ({ ...movimiento, fecha: new Date(movimiento.fecha) }))
+      .reverse()
+      .sort((a, b) => b.fecha - a.fecha);
   }
 
   // Privado (#): solo consignar() y retirar() pueden llamarlo, después de
