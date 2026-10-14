@@ -73,4 +73,24 @@ class Cliente {
     const cuenta = this.cuentas.find((c) => c.tipo === tipo);
     return cuenta || null;
   }
+
+  // ---------- Almacenamiento ----------
+
+  // Convierte el cliente en un objeto simple para guardarlo con JSON.
+  // LIMITACIÓN: la contraseña queda como texto en localStorage y se puede
+  // ver en las herramientas del navegador. Aceptable para el proyecto.
+  aDatos() {
+    return {
+      tipoDocumento: this.tipoDocumento,
+      identificacion: this.identificacion,
+      nombreCompleto: this.nombreCompleto,
+      celular: this.celular,
+      correo: this.correo,
+      usuario: this.usuario,
+      contrasena: this.#contrasena,
+      intentosFallidos: this.intentosFallidos,
+      bloqueadoHasta: this.bloqueadoHasta,
+      cuentas: this.cuentas.map((cuenta) => cuenta.aDatos()),
+    };
+  }
 }

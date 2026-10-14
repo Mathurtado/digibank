@@ -45,6 +45,7 @@ class Banco {
 
     // Paso 5: guardarlo. Solo se llega aquí si todo fue válido.
     this.#clientes.push(cliente);
+    this.guardar();
 
     return crearRespuesta(
       "exito",
@@ -251,6 +252,7 @@ class Banco {
     // Paso 4: contraseña incorrecta. Se suma el intento.
     if (!cliente.verificarContrasena(textoContrasena)) {
       cliente.registrarIntentoFallido();
+      this.guardar(); // así el bloqueo sigue aunque se recargue la página
 
       // Si con este intento llegó al máximo, se avisa del bloqueo de inmediato
       if (cliente.estaBloqueado()) {
@@ -264,6 +266,7 @@ class Banco {
 
     // Paso 5: todo bien. Se reinicia el contador y se abre la sesión.
     cliente.reiniciarIntentos();
+    this.guardar();
     this.clienteActivo = cliente;
     return crearRespuesta("exito", "Bienvenido, " + cliente.nombreCompleto + ".", {
       intentosRestantes: MAX_INTENTOS,
@@ -305,12 +308,84 @@ class Banco {
     return new TarjetaCredito(numero);
   }
 
+  // ---------- Almacenamiento (localStorage) ----------
+
+  // Guarda todos los clientes y sus cuentas en el navegador.
+  // La sesión (clienteActivo) NO se guarda: al recargar hay que volver a entrar.
+  // Se llama después de cada cambio: registro, intentos de login y, desde la
+  // interfaz, después de cada consignación, retiro, compra o pago exitoso.
+  guardar() {
+    const datos = {
+      siguienteNumeroCuenta: this.#siguienteNumeroCuenta,
+      clientes: this.#clientes.map((cliente) => cliente.aDatos()),
+    };
+    try {
+      localStorage.setItem(CLAVE_ALMACENAMIENTO, JSON.stringify(datos));
+    } catch (error) {
+      // Navegador sin almacenamiento (modo privado o lleno): la app sigue
+      // funcionando, solo que los datos se pierden al recargar.
+      console.warn("No se pudieron guardar los datos:", error);
+    }
+  }
+
+  // Carga los clientes guardados. Si no hay nada guardado o los datos están
+  // dañados, el banco queda vacío. Se llama una sola vez, al arrancar (app.js).
+  cargar() {
+    try {
+      const texto = localStorage.getItem(CLAVE_ALMACENAMIENTO);
+      if (texto === null) {
+        return;
+      }
+      const datos = JSON.parse(texto);
+      this.#clientes = datos.clientes.map((d) => this.#reconstruirCliente(d));
+      this.#siguienteNumeroCuenta = datos.siguienteNumeroCuenta;
+    } catch (error) {
+      console.warn("No se pudieron cargar los datos guardados:", error);
+      this.#clientes = [];
+      this.#siguienteNumeroCuenta = 1;
+    }
+  }
+
+  // Crea de nuevo un Cliente (con sus métodos) a partir de los datos guardados.
+  #reconstruirCliente(datos) {
+    const cliente = new Cliente(datos);
+    cliente.intentosFallidos = datos.intentosFallidos;
+    cliente.bloqueadoHasta = datos.bloqueadoHasta;
+    datos.cuentas.forEach((d) => {
+      cliente.agregarCuenta(this.#reconstruirCuenta(d));
+    });
+    return cliente;
+  }
+
+  // Crea la clase correcta según el tipo guardado y le devuelve su saldo,
+  // sus movimientos y, si es tarjeta, sus compras.
+  #reconstruirCuenta(datos) {
+    let cuenta;
+    if (datos.tipo === "ahorros") {
+      cuenta = new CuentaAhorros(datos.numero);
+    } else if (datos.tipo === "corriente") {
+      cuenta = new CuentaCorriente(datos.numero);
+    } else {
+      cuenta = new TarjetaCredito(datos.numero, datos.cupo);
+      TarjetaCredito.restaurarCompras(cuenta, datos.compras);
+    }
+    Cuenta.restaurar(cuenta, datos);
+    return cuenta;
+  }
+
   // ---------- Datos de prueba (BORRAR antes de la entrega final) ----------
 
   // Crea un cliente para que Juan y Sebastián puedan probar sin esperar
   // el registro. Usuario: prueba / Contraseña: prueba123
   // Además deja la sesión iniciada con ese cliente.
+  // Si ya estaba guardado (de una visita anterior), lo reutiliza.
   cargarDatosDePrueba() {
+    const guardado = this.buscarPorUsuario("prueba");
+    if (guardado !== null) {
+      this.clienteActivo = guardado;
+      return;
+    }
+
     const cliente = new Cliente({
       tipoDocumento: "cedula",
       identificacion: "1000000000",
@@ -324,6 +399,7 @@ class Banco {
     cliente.agregarCuenta(this.crearCuenta("corriente"));
     cliente.agregarCuenta(this.crearCuenta(TIPO_TARJETA));
     this.#clientes.push(cliente);
+    this.guardar();
     this.clienteActivo = cliente;
   }
 }
