@@ -26,6 +26,9 @@ function mostrarVista(idVista) {
   document.querySelectorAll(".vista").forEach((vista) => {
     vista.classList.toggle("oculto", vista.id !== idVista);
   });
+  if (idVista === "vista-saldo") {
+    actualizarSaldo();
+  }
   ocultarMensaje();
 }
 
