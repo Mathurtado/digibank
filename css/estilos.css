@@ -1,108 +1,942 @@
 /* =============================================================
-   estilos.css — Estilos base mínimos para que el esqueleto funcione.
-   Responsable del diseño final: Sebastián.
-   Las clases .oculto y .mensaje-* las usa app.js: no renombrarlas.
+   estilos.css — DigiBank
+   Identidad: banca privada tradicional. Verde bosque y latón,
+   tipografía grabada (Libre Caslon) y el guilloché de los billetes
+   como único recurso decorativo.
+
+   Las clases .oculto, .seccion, .vista, .mensaje-*, .campo-monto y
+   .boton-principal las usa el JavaScript: no renombrarlas.
    ============================================================= */
 
+/* ---------- 1. Tokens ---------- */
+
 :root {
-  --color-primario: #1f4e79;
-  --color-fondo: #f5f7fa;
-  --color-texto: #1d1d1f;
-  --color-exito: #1e7b34;
-  --color-error: #b3261e;
-  --color-advertencia: #8a6100;
+  /* Color */
+  --verde: #0f2e26;          /* marca */
+  --verde-medio: #1b4438;    /* hover y bordes sobre verde */
+  --laton: #b08d57;          /* acento */
+  --laton-claro: #d8c39b;    /* texto de acento sobre verde */
+  --piedra: #eef0ec;         /* fondo de página */
+  --papel: #ffffff;          /* superficies */
+  --tinta: #18201d;          /* texto principal */
+  --pizarra: #5b6862;        /* texto secundario */
+  --linea: #d7dcd6;          /* bordes y divisores */
+
+  --exito: #2e6b4e;
+  --error: #a3362e;
+  --advertencia: #8a6512;
+
+  /* Tipografía */
+  --fuente-titulo: "Libre Caslon Display", Georgia, "Times New Roman", serif;
+  --fuente-texto: "Public Sans", "Segoe UI", system-ui, sans-serif;
+
+  /* Escala tipográfica (razón 1,25) */
+  --t-pequeno: 0.875rem;
+  --t-base: 1rem;
+  --t-medio: 1.25rem;
+  --t-grande: 1.5625rem;
+  --t-titulo: 2.4414rem;
+  --t-portada: clamp(2.6rem, 5.5vw, 4.25rem);
+
+  /* Espacio */
+  --e-1: 0.25rem;
+  --e-2: 0.5rem;
+  --e-3: 0.75rem;
+  --e-4: 1rem;
+  --e-5: 1.5rem;
+  --e-6: 2rem;
+  --e-7: 3rem;
+  --e-8: 4.5rem;
+
+  --ancho: 72rem;
+  --radio: 6px;
+  --radio-grande: 14px;
 }
 
-* {
+/* ---------- 2. Base ---------- */
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  background: var(--color-fondo);
-  color: var(--color-texto);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--fuente-texto);
+  font-size: var(--t-base);
+  line-height: 1.55;
+  color: var(--tinta);
+  background: var(--piedra);
+  font-variant-numeric: tabular-nums;
 }
 
 main {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 16px;
+  flex: 1;
+  width: 100%;
 }
 
-.encabezado {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 12px 16px;
-  background: var(--color-primario);
-  color: #fff;
-}
-
-.marca {
+h1,
+h2,
+h3 {
+  font-family: var(--fuente-titulo);
+  font-weight: 400;
+  line-height: 1.15;
   margin: 0;
-  font-size: 1.4rem;
 }
 
-.menu,
-.menu-panel {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+p {
+  margin: 0;
 }
 
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-width: 420px;
-}
-
+button,
 input,
-select,
-button {
+select {
   font: inherit;
-  padding: 8px;
+  color: inherit;
 }
 
-.boton-principal {
-  margin-top: 8px;
-  background: var(--color-primario);
-  color: #fff;
-  border: none;
+button {
   cursor: pointer;
 }
 
-/* ---------- Usadas por app.js ---------- */
+:focus-visible {
+  outline: 2px solid var(--laton);
+  outline-offset: 3px;
+}
 
+/* Usada por app.js: no renombrar */
 .oculto {
   display: none !important;
 }
 
+/* ---------- 3. Botones y enlaces ---------- */
+
+.boton-principal,
+.boton-secundario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.875rem;
+  padding: 0 var(--e-5);
+  border-radius: var(--radio);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.boton-principal {
+  background: var(--verde);
+  color: var(--papel);
+  border: 1px solid var(--verde);
+}
+
+.boton-principal:hover {
+  background: var(--verde-medio);
+  border-color: var(--verde-medio);
+}
+
+.boton-secundario {
+  background: transparent;
+  color: var(--verde);
+  border: 1px solid var(--verde);
+}
+
+.boton-secundario:hover {
+  background: var(--papel);
+}
+
+.boton-compacto {
+  min-height: 2.5rem;
+  padding: 0 var(--e-4);
+}
+
+.boton-ancho {
+  width: 100%;
+}
+
+.enlace {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--verde);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--laton);
+  text-underline-offset: 3px;
+}
+
+/* ---------- 4. Encabezado ---------- */
+
+.encabezado {
+  background: var(--verde);
+  color: var(--papel);
+  border-bottom: 1px solid var(--laton);
+}
+
+.encabezado-contenido {
+  max-width: var(--ancho);
+  margin: 0 auto;
+  padding: var(--e-4) var(--e-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-4);
+  flex-wrap: wrap;
+}
+
+.marca {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-3);
+}
+
+.marca-sello {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--laton);
+  border-radius: 50%;
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-medio);
+  line-height: 1;
+  color: var(--laton-claro);
+}
+
+.marca-nombre {
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-grande);
+  letter-spacing: 0.01em;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+}
+
+.menu-enlace {
+  padding: var(--e-2) var(--e-3);
+  border: 0;
+  border-radius: var(--radio);
+  background: none;
+  color: var(--papel);
+  font-weight: 500;
+}
+
+.menu-enlace:hover {
+  color: var(--laton-claro);
+}
+
+/* En el encabezado, el botón principal invierte sus colores */
+.encabezado .boton-principal {
+  background: var(--laton);
+  border-color: var(--laton);
+  color: var(--verde);
+}
+
+.encabezado .boton-principal:hover {
+  background: var(--laton-claro);
+  border-color: var(--laton-claro);
+}
+
+/* Con la sesión abierta, el menú público no tiene sentido: se oculta */
+body:has(#seccion-panel:not(.oculto)) #menu-publico {
+  display: none;
+}
+
+/* ---------- 5. Mensajes (usados por app.js) ---------- */
+
 .mensaje {
-  max-width: 720px;
-  margin: 12px auto 0;
-  padding: 10px 16px;
-  border-left: 4px solid;
-  background: #fff;
+  max-width: calc(var(--ancho) - 2 * var(--e-5));
+  margin: var(--e-5) auto 0;
+  padding: var(--e-4) var(--e-5);
+  border-left: 4px solid currentColor;
+  border-radius: var(--radio);
+  background: var(--papel);
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(15, 46, 38, 0.08);
 }
 
 .mensaje-exito {
-  color: var(--color-exito);
+  color: var(--exito);
 }
 
 .mensaje-error {
-  color: var(--color-error);
+  color: var(--error);
 }
 
 .mensaje-advertencia {
-  color: var(--color-advertencia);
+  color: var(--advertencia);
 }
 
-.pie {
-  padding: 16px;
+/* ---------- 6. Página de inicio ---------- */
+
+.portada {
+  max-width: var(--ancho);
+  margin: 0 auto;
+  padding: var(--e-8) var(--e-5) var(--e-7);
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  align-items: center;
+  gap: var(--e-7);
+}
+
+.portada-titulo {
+  font-size: var(--t-portada);
+  color: var(--verde);
+  letter-spacing: -0.01em;
+  max-width: 12ch;
+}
+
+.portada-descripcion {
+  margin-top: var(--e-5);
+  max-width: 34rem;
+  font-size: var(--t-medio);
+  line-height: 1.5;
+  color: var(--pizarra);
+}
+
+.portada-acciones {
+  margin-top: var(--e-6);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3);
+}
+
+/* La tarjeta: el elemento memorable de la página */
+.portada-tarjeta {
+  display: flex;
+  justify-content: center;
+}
+
+.tarjeta-plastico {
+  width: min(100%, 26rem);
+  aspect-ratio: 1.586;          /* proporción real de una tarjeta */
+  padding: var(--e-5) var(--e-6);
+  border-radius: var(--radio-grande);
+  background-color: var(--verde);
+  background-image: url("../img/guilloche.svg");
+  background-size: 135%;
+  background-position: 115% 40%;
+  background-repeat: no-repeat;
+  color: var(--laton-claro);
+  border: 1px solid var(--verde-medio);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 24px 48px -24px rgba(15, 46, 38, 0.55);
+  transform: rotate(-4deg);
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  grid-template-columns: 1fr auto;
+  overflow: hidden;
+}
+
+.tarjeta-marca {
+  grid-column: 1 / -1;
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-grande);
+  color: var(--papel);
+}
+
+.tarjeta-chip {
+  align-self: center;
+  width: 2.75rem;
+  height: 2.1rem;
+  border-radius: 5px;
+  background: linear-gradient(135deg, #e3cfa4, #a8844d);
+  box-shadow: inset 0 0 0 1px rgba(15, 46, 38, 0.25);
+}
+
+.tarjeta-numero {
+  grid-column: 1 / -1;
+  font-size: var(--t-medio);
+  letter-spacing: 0.06em;
+  color: var(--papel);
+}
+
+.tarjeta-titular,
+.tarjeta-vence {
+  margin-top: var(--e-2);
+  font-size: var(--t-pequeno);
+}
+
+.tarjeta-vence {
+  justify-self: end;
+}
+
+/* Productos: una lista de condiciones, no tarjetas */
+.institucional {
+  padding: var(--e-8) max(var(--e-5), calc((100% - var(--ancho)) / 2 + var(--e-5)));
+  background: var(--papel);
+  border-top: 1px solid var(--linea);
+  border-bottom: 1px solid var(--linea);
+}
+
+.institucional-titulo,
+.pasos-titulo {
+  font-size: var(--t-titulo);
+  color: var(--verde);
+}
+
+.productos {
+  margin: var(--e-6) 0 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--tinta);
+}
+
+.producto {
+  padding: var(--e-5) var(--e-5) 0 0;
+}
+
+.producto + .producto {
+  padding-left: var(--e-5);
+  border-left: 1px solid var(--linea);
+}
+
+.producto dt {
+  font-weight: 600;
+  color: var(--pizarra);
+}
+
+.producto dd {
+  margin: 0;
+}
+
+.producto .producto-dato {
+  margin-top: var(--e-2);
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-grande);
+  line-height: 1.2;
+  color: var(--verde);
+}
+
+.producto .producto-detalle {
+  margin-top: var(--e-3);
+  color: var(--pizarra);
+  max-width: 28ch;
+}
+
+/* Pasos: es una secuencia real, por eso va numerada */
+.pasos {
+  max-width: var(--ancho);
+  margin: 0 auto;
+  padding: var(--e-8) var(--e-5);
+}
+
+.pasos-lista {
+  list-style: none;
+  counter-reset: paso;
+  margin: var(--e-6) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--e-6);
+}
+
+.pasos-lista li {
+  counter-increment: paso;
+}
+
+.pasos-lista li::before {
+  content: counter(paso);
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: var(--e-4);
+  border: 1px solid var(--laton);
+  border-radius: 50%;
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-medio);
+  line-height: 1;
+  color: var(--verde);
+}
+
+.pasos-lista h3 {
+  font-size: var(--t-medio);
+  color: var(--verde);
+}
+
+.pasos-lista p {
+  margin-top: var(--e-2);
+  color: var(--pizarra);
+}
+
+/* ---------- 7. Registro e inicio de sesión ---------- */
+
+.acceso {
+  max-width: 60rem;
+  margin: var(--e-7) auto;
+  padding: 0 var(--e-5);
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+}
+
+.acceso-marca {
+  padding: var(--e-7) var(--e-6);
+  background-color: var(--verde);
+  background-image: url("../img/guilloche.svg");
+  background-size: 24rem;
+  background-position: right -7rem bottom -8rem;
+  background-repeat: no-repeat;
+  color: var(--laton-claro);
+  border-radius: var(--radio-grande) 0 0 var(--radio-grande);
+}
+
+.acceso-marca h2 {
+  font-size: var(--t-titulo);
+  color: var(--papel);
+}
+
+.acceso-marca p {
+  margin-top: var(--e-4);
+  max-width: 26ch;
+}
+
+.acceso .formulario {
+  padding: var(--e-7) var(--e-6);
+  background: var(--papel);
+  border: 1px solid var(--linea);
+  border-left: 0;
+  border-radius: 0 var(--radio-grande) var(--radio-grande) 0;
+}
+
+/* ---------- 8. Formularios ---------- */
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+.formulario-fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--e-4);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+}
+
+.campo label,
+.opciones legend {
+  font-size: var(--t-pequeno);
+  font-weight: 600;
+  color: var(--tinta);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+select {
+  width: 100%;
+  min-height: 2.875rem;
+  padding: 0 var(--e-4);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  background: var(--papel);
+  transition: border-color 0.15s ease;
+}
+
+input[type="text"]:hover,
+input[type="email"]:hover,
+input[type="password"]:hover,
+select:hover {
+  border-color: var(--pizarra);
+}
+
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--laton);
+  outline-offset: 0;
+  border-color: var(--verde);
+}
+
+/* Montos: grandes y alineados a la derecha, como en un extracto */
+input.campo-monto {
+  min-height: 3.5rem;
+  font-size: var(--t-medio);
+  font-weight: 600;
+  text-align: right;
+}
+
+.ayuda {
+  font-size: var(--t-pequeno);
+  color: var(--pizarra);
+}
+
+.opciones {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--e-3);
+}
+
+.opciones legend {
+  padding: 0;
+  margin-bottom: var(--e-2);
+}
+
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  padding: var(--e-3) var(--e-4);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  cursor: pointer;
+}
+
+.opcion:has(input:checked) {
+  border-color: var(--verde);
+  background: #f3f6f2;
+}
+
+.opcion input {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin: 0;
+  accent-color: var(--verde);
+}
+
+.formulario-alterno {
   text-align: center;
-  font-size: 0.9rem;
+  color: var(--pizarra);
+}
+
+.intentos {
+  padding: var(--e-3) var(--e-4);
+  border-radius: var(--radio);
+  background: #f6efe2;
+  color: var(--advertencia);
+  font-weight: 600;
+  font-size: var(--t-pequeno);
+}
+
+/* ---------- 9. Panel de transacciones ---------- */
+
+.panel {
+  max-width: 52rem;
+  margin: var(--e-7) auto;
+  padding: 0 var(--e-5);
+}
+
+.panel-cabecera {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--e-5);
+  flex-wrap: wrap;
+}
+
+.panel-saludo {
+  font-size: var(--t-titulo);
+  color: var(--verde);
+}
+
+.panel-selector {
+  min-width: 17rem;
+}
+
+.menu-panel {
+  margin-top: var(--e-6);
+  display: flex;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--linea);
+}
+
+.menu-panel button {
+  padding: var(--e-3) var(--e-4);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: none;
+  color: var(--pizarra);
+  font-weight: 600;
+}
+
+.menu-panel button:hover {
+  color: var(--verde);
+}
+
+/* La pestaña activa se detecta con :has, sin tocar app.js */
+.panel:has(#vista-saldo:not(.oculto)) [data-ver="vista-saldo"],
+.panel:has(#vista-consignar:not(.oculto)) [data-ver="vista-consignar"],
+.panel:has(#vista-retirar:not(.oculto)) [data-ver="vista-retirar"],
+.panel:has(#vista-movimientos:not(.oculto)) [data-ver="vista-movimientos"] {
+  color: var(--verde);
+  border-bottom-color: var(--laton);
+}
+
+.menu-panel .menu-panel-salir {
+  margin-left: auto;
+  color: var(--error);
+}
+
+.vista {
+  margin-top: var(--e-5);
+  padding: var(--e-6);
+  background: var(--papel);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio-grande);
+}
+
+.vista h3 {
+  font-size: var(--t-grande);
+  color: var(--verde);
+}
+
+.saldo-fecha {
+  margin-top: var(--e-2);
+  font-size: var(--t-pequeno);
+  color: var(--pizarra);
+}
+
+/* El saldo es el dato más importante del panel */
+.saldo {
+  margin-top: var(--e-4);
+  font-family: var(--fuente-titulo);
+  font-size: clamp(2.25rem, 6vw, 3.5rem);
+  line-height: 1.1;
+  color: var(--tinta);
+}
+
+.formulario-operacion {
+  margin-top: var(--e-5);
+  flex-direction: row;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.formulario-operacion .campo {
+  flex: 1 1 16rem;
+}
+
+.formulario-operacion .boton-principal {
+  min-height: 3.5rem;
+  padding: 0 var(--e-6);
+}
+
+/* Movimientos: filas de extracto bancario */
+.movimientos {
+  list-style: none;
+  margin: var(--e-5) 0 0;
+  padding: 0;
+  border-top: 1px solid var(--tinta);
+}
+
+.movimientos li {
+  padding: var(--e-3) 0;
+  border-bottom: 1px solid var(--linea);
+}
+
+/* Columnas para cuando consultas.js use estas clases */
+.movimiento {
+  display: grid;
+  grid-template-columns: 11rem 1fr auto auto;
+  gap: var(--e-4);
+  align-items: baseline;
+}
+
+.movimiento-fecha,
+.movimiento-saldo {
+  font-size: var(--t-pequeno);
+  color: var(--pizarra);
+}
+
+.movimiento-tipo {
+  font-weight: 600;
+}
+
+.movimiento-valor {
+  font-weight: 600;
+  text-align: right;
+}
+
+.movimiento-entrada .movimiento-valor {
+  color: var(--exito);
+}
+
+.movimiento-vacio {
+  color: var(--pizarra);
+}
+
+/* ---------- 10. Pie de página ---------- */
+
+.pie {
+  background: var(--verde);
+  color: var(--laton-claro);
+  border-top: 1px solid var(--laton);
+}
+
+.pie-contenido {
+  max-width: var(--ancho);
+  margin: 0 auto;
+  padding: var(--e-7) var(--e-5) var(--e-5);
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e-6);
+  flex-wrap: wrap;
+}
+
+.pie-marca .marca-nombre {
+  color: var(--papel);
+}
+
+.pie-marca p {
+  margin-top: var(--e-2);
+  max-width: 32ch;
+  font-size: var(--t-pequeno);
+}
+
+.pie-redes {
+  display: flex;
+  gap: var(--e-5);
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.pie-redes a {
+  color: var(--papel);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.pie-redes a:hover {
+  color: var(--laton-claro);
+  text-decoration: underline;
+}
+
+.pie-legal {
+  max-width: var(--ancho);
+  margin: 0 auto;
+  padding: var(--e-4) var(--e-5) var(--e-6);
+  border-top: 1px solid var(--verde-medio);
+  font-size: var(--t-pequeno);
+  color: #9fb0a8;
+}
+
+/* ---------- 11. Responsivo ---------- */
+
+@media (max-width: 900px) {
+  .portada {
+    grid-template-columns: 1fr;
+    padding-top: var(--e-7);
+  }
+
+  .portada-tarjeta {
+    justify-content: flex-start;
+  }
+
+  .productos,
+  .pasos-lista {
+    grid-template-columns: 1fr;
+  }
+
+  .producto,
+  .producto + .producto {
+    padding: var(--e-5) 0;
+    border-left: 0;
+  }
+
+  .producto + .producto {
+    border-top: 1px solid var(--linea);
+  }
+
+  .acceso {
+    grid-template-columns: 1fr;
+  }
+
+  .acceso-marca {
+    padding: var(--e-6) var(--e-5);
+    border-radius: var(--radio-grande) var(--radio-grande) 0 0;
+  }
+
+  .acceso .formulario {
+    padding: var(--e-6) var(--e-5);
+    border-left: 1px solid var(--linea);
+    border-top: 0;
+    border-radius: 0 0 var(--radio-grande) var(--radio-grande);
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --t-titulo: 1.953rem;
+  }
+
+  .encabezado-contenido {
+    padding: var(--e-3) var(--e-4);
+  }
+
+  .menu-enlace[data-ir-a="seccion-inicio"] {
+    display: none;
+  }
+
+  .portada,
+  .pasos {
+    padding-left: var(--e-4);
+    padding-right: var(--e-4);
+  }
+
+  .tarjeta-plastico {
+    transform: none;
+    padding: var(--e-4) var(--e-5);
+  }
+
+  .formulario-fila,
+  .opciones {
+    grid-template-columns: 1fr;
+  }
+
+  .acceso,
+  .panel {
+    margin: var(--e-5) auto;
+    padding: 0 var(--e-4);
+  }
+
+  .vista {
+    padding: var(--e-5) var(--e-4);
+  }
+
+  .menu-panel .menu-panel-salir {
+    margin-left: 0;
+  }
+
+  .formulario-operacion .boton-principal {
+    width: 100%;
+  }
+
+  .movimiento {
+    grid-template-columns: 1fr auto;
+  }
+
+  .movimiento-fecha {
+    grid-column: 1 / -1;
+  }
+
+  .mensaje {
+    margin: var(--e-4) var(--e-4) 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
 }
