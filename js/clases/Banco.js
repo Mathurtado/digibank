@@ -17,7 +17,9 @@ class Banco {
 
   /**
    * datos: { tipoDocumento, identificacion, nombreCompleto, celular, correo,
-   *          usuario, contrasena, confirmacion, tiposCuenta, solicitaTarjeta }
+   *          usuario, contrasena, confirmacion, tiposCuenta, solicitaTarjeta,
+   *          saldoInicial }
+   *   saldoInicial: texto del campo ("150.000") o número. Vacío = $0
    * Los datos llegan tal como se escribieron en el formulario.
    * Devuelve: crearRespuesta(...)
    */
@@ -43,7 +45,14 @@ class Banco {
       cliente.agregarCuenta(this.crearCuenta(TIPO_TARJETA));
     }
 
-    // Paso 5: guardarlo. Solo se llega aquí si todo fue válido.
+    // Paso 5: saldo inicial. Se consigna en ahorros si la eligió; si no, en
+    // corriente. Se usa consignar() para que quede como primer movimiento.
+    if (limpios.saldoInicial > 0) {
+      const cuentaInicial = cliente.obtenerCuenta("ahorros") || cliente.obtenerCuenta("corriente");
+      cuentaInicial.consignar(limpios.saldoInicial);
+    }
+
+    // Paso 6: guardarlo. Solo se llega aquí si todo fue válido.
     this.#clientes.push(cliente);
 
     return crearRespuesta(
@@ -93,7 +102,20 @@ class Banco {
       confirmacion: String(datos.confirmacion || ""),
       tiposCuenta: Array.isArray(datos.tiposCuenta) ? datos.tiposCuenta : [],
       solicitaTarjeta: datos.solicitaTarjeta === true,
+      // Vacío = $0. El campo ya solo deja escribir dígitos y puntos de miles.
+      // Si llega un número (por ejemplo desde la consola), se respeta.
+      saldoInicial: this.#convertirSaldoInicial(datos.saldoInicial),
     };
+  }
+
+  // "" -> 0, "150.000" -> 150000. Un número se deja igual para que la
+  // validación decida si sirve (decimales o negativos se rechazan).
+  #convertirSaldoInicial(valor) {
+    if (typeof valor === "number") {
+      return valor;
+    }
+    const texto = String(valor || "").trim();
+    return texto === "" ? 0 : convertirMonto(texto);
   }
 
   // Revisa los datos en el orden del formulario.
@@ -214,6 +236,11 @@ class Banco {
     const sinRepetir = new Set(d.tiposCuenta).size === d.tiposCuenta.length;
     if (!tiposValidos || !sinRepetir) {
       return crearRespuesta("error", "Los tipos de cuenta elegidos no son válidos.");
+    }
+
+    // ----- Saldo inicial (opcional) -----
+    if (!Number.isInteger(d.saldoInicial) || d.saldoInicial < 0) {
+      return crearRespuesta("error", "El saldo inicial debe ser un número entero de $0 o más.");
     }
 
     return null; // todo está bien
