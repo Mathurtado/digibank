@@ -3,143 +3,287 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mi Plata — Sistema Bancario</title>
+  <title>DigiBank</title>
+  <meta name="description" content="DigiBank: cuentas de ahorro y corriente, tarjeta de crédito y transferencias en un solo lugar.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Public+Sans:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
 
-  <!-- ===== Encabezado y menú (visible en todas las secciones) ===== -->
+  <!-- ===== Encabezado y menú ===== -->
   <header class="encabezado">
-    <h1 class="marca">Mi Plata</h1>
-    <nav id="menu-publico" class="menu">
-      <button type="button" data-ir-a="seccion-inicio">Inicio</button>
-      <button type="button" data-ir-a="seccion-login">Iniciar sesión</button>
-      <button type="button" data-ir-a="seccion-registro">Registrarse</button>
-    </nav>
+    <div class="encabezado-contenido">
+      <div class="marca">
+        <span class="marca-sello" aria-hidden="true">D</span>
+        <span class="marca-nombre">DigiBank</span>
+      </div>
+      <!-- El menú público se oculta solo (con CSS) mientras el panel está abierto -->
+      <nav id="menu-publico" class="menu" aria-label="Menú principal">
+        <button type="button" class="menu-enlace" data-ir-a="seccion-inicio">Inicio</button>
+        <button type="button" class="menu-enlace" data-ir-a="seccion-login">Iniciar sesión</button>
+        <button type="button" class="boton-principal boton-compacto" data-ir-a="seccion-registro">Abrir mi cuenta</button>
+      </nav>
+    </div>
   </header>
 
   <!-- Mensajes de retroalimentación: éxito, error o advertencia -->
-  <div id="mensaje" class="mensaje oculto" role="status"></div>
+  <div id="mensaje" class="mensaje oculto" role="status" aria-live="polite"></div>
 
   <main>
 
-    <!-- ===== Landing (Sebastián, rama 32 / landing) ===== -->
+    <!-- ===== Página de inicio (rama 47) ===== -->
     <section id="seccion-inicio" class="seccion">
-      <h2>Bienvenido a Mi Plata</h2>
-      <p>Presentación institucional del banco. (Sebastián)</p>
+
+      <div class="portada">
+        <div class="portada-texto">
+          <h1 class="portada-titulo">Tu dinero, bien administrado.</h1>
+          <p class="portada-descripcion">
+            Cuentas de ahorro y corriente, tarjeta de crédito y transferencias en un solo lugar.
+            Abre tu cuenta en minutos y maneja tu dinero cuando lo necesites.
+          </p>
+          <div class="portada-acciones">
+            <button type="button" class="boton-principal" data-ir-a="seccion-registro">Abrir mi cuenta</button>
+            <button type="button" class="boton-secundario" data-ir-a="seccion-login">Ya soy cliente</button>
+          </div>
+        </div>
+
+        <!-- Tarjeta ilustrativa: es decorativa -->
+        <div class="portada-tarjeta" aria-hidden="true">
+          <div class="tarjeta-plastico">
+            <span class="tarjeta-marca">DigiBank</span>
+            <span class="tarjeta-chip"></span>
+            <span class="tarjeta-numero">5412&nbsp;&nbsp;7700&nbsp;&nbsp;0421&nbsp;&nbsp;2048</span>
+            <span class="tarjeta-titular">Valentina Restrepo</span>
+            <span class="tarjeta-vence">10/30</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="institucional">
+        <h2 class="institucional-titulo">Productos pensados para cada momento</h2>
+        <dl class="productos">
+          <div class="producto">
+            <dt>Cuenta de ahorros</dt>
+            <dd class="producto-dato">1,5&nbsp;% de rendimiento mensual</dd>
+            <dd class="producto-detalle">Guarda tu dinero a mediano y largo plazo. Consigna y retira cuando quieras.</dd>
+          </div>
+          <div class="producto">
+            <dt>Cuenta corriente</dt>
+            <dd class="producto-dato">Sobregiro de hasta el 20&nbsp;%</dd>
+            <dd class="producto-detalle">Para recibir tu nómina, pagar tus facturas y transferir en el día a día.</dd>
+          </div>
+          <div class="producto">
+            <dt>Tarjeta de crédito</dt>
+            <dd class="producto-dato">Hasta 2 cuotas sin interés</dd>
+            <dd class="producto-detalle">Elige el número de cuotas y conoce tu pago mensual antes de comprar.</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="pasos">
+        <h2 class="pasos-titulo">Empieza en tres pasos</h2>
+        <ol class="pasos-lista">
+          <li>
+            <h3>Regístrate</h3>
+            <p>Con tu cédula o pasaporte, tu celular y un nombre de usuario.</p>
+          </li>
+          <li>
+            <h3>Elige tus productos</h3>
+            <p>Cuenta de ahorros, cuenta corriente o ambas.</p>
+          </li>
+          <li>
+            <h3>Maneja tu dinero</h3>
+            <p>Consulta tu saldo, consigna, retira y revisa tus movimientos desde tu panel.</p>
+          </li>
+        </ol>
+      </div>
     </section>
 
-    <!-- ===== Registro (Mateo, rama 4-registrar-clientes) ===== -->
+    <!-- ===== Registro (rama 4) ===== -->
     <section id="seccion-registro" class="seccion oculto">
-      <h2>Registro de clientes</h2>
-      <form id="registro-formulario" novalidate>
-        <label for="registro-tipo-documento">Tipo de documento</label>
-        <select id="registro-tipo-documento">
-          <option value="cedula">Cédula</option>
-          <option value="pasaporte">Pasaporte</option>
-        </select>
+      <div class="acceso">
+        <aside class="acceso-marca">
+          <h2>Abre tu cuenta</h2>
+          <p>Tus datos solo se usan para identificarte. Tu documento y tu nombre de usuario deben ser únicos.</p>
+        </aside>
 
-        <label for="registro-identificacion">Número de documento</label>
-        <input type="text" id="registro-identificacion" autocomplete="off">
+        <form id="registro-formulario" class="formulario" novalidate>
+          <div class="formulario-fila">
+            <div class="campo">
+              <label for="registro-tipo-documento">Tipo de documento</label>
+              <select id="registro-tipo-documento">
+                <option value="cedula">Cédula</option>
+                <option value="pasaporte">Pasaporte</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label for="registro-identificacion">Número de documento</label>
+              <input type="text" id="registro-identificacion" autocomplete="off">
+            </div>
+          </div>
 
-        <label for="registro-nombre">Nombre completo</label>
-        <input type="text" id="registro-nombre" autocomplete="name">
+          <div class="campo">
+            <label for="registro-nombre">Nombre completo</label>
+            <input type="text" id="registro-nombre" autocomplete="name">
+          </div>
 
-        <label for="registro-celular">Celular</label>
-        <input type="text" id="registro-celular" inputmode="numeric" maxlength="10" autocomplete="tel">
+          <div class="formulario-fila">
+            <div class="campo">
+              <label for="registro-celular">Celular</label>
+              <input type="text" id="registro-celular" inputmode="numeric" maxlength="10" autocomplete="tel">
+            </div>
+            <div class="campo">
+              <label for="registro-correo">Correo electrónico</label>
+              <input type="email" id="registro-correo" autocomplete="email">
+            </div>
+          </div>
 
-        <label for="registro-correo">Correo electrónico</label>
-        <input type="email" id="registro-correo" autocomplete="email">
+          <div class="campo">
+            <label for="registro-usuario">Nombre de usuario</label>
+            <input type="text" id="registro-usuario" autocomplete="username">
+            <p class="ayuda">De 4 a 15 caracteres: letras sin tildes, números y guion bajo.</p>
+          </div>
 
-        <label for="registro-usuario">Nombre de usuario</label>
-        <input type="text" id="registro-usuario" autocomplete="username">
+          <div class="formulario-fila">
+            <div class="campo">
+              <label for="registro-contrasena">Contraseña</label>
+              <input type="password" id="registro-contrasena" autocomplete="new-password">
+            </div>
+            <div class="campo">
+              <label for="registro-confirmacion">Confirmar contraseña</label>
+              <input type="password" id="registro-confirmacion" autocomplete="new-password">
+            </div>
+          </div>
+          <p class="ayuda">Mínimo 6 caracteres, con al menos una letra y un número.</p>
 
-        <label for="registro-contrasena">Contraseña</label>
-        <input type="password" id="registro-contrasena" autocomplete="new-password">
+          <fieldset class="opciones">
+            <legend>¿Qué cuentas quieres abrir?</legend>
+            <label class="opcion">
+              <input type="checkbox" id="registro-cuenta-ahorros" value="ahorros">
+              <span>Cuenta de ahorros</span>
+            </label>
+            <label class="opcion">
+              <input type="checkbox" id="registro-cuenta-corriente" value="corriente">
+              <span>Cuenta corriente</span>
+            </label>
+          </fieldset>
 
-        <label for="registro-confirmacion">Confirmar contraseña</label>
-        <input type="password" id="registro-confirmacion" autocomplete="new-password">
-
-        <fieldset>
-          <legend>Tipo de cuenta</legend>
-          <label><input type="checkbox" id="registro-cuenta-ahorros" value="ahorros"> Ahorros</label>
-          <label><input type="checkbox" id="registro-cuenta-corriente" value="corriente"> Corriente</label>
-        </fieldset>
-
-        <button type="submit" class="boton-principal">Registrarme</button>
-      </form>
+          <button type="submit" class="boton-principal boton-ancho">Registrarme</button>
+          <p class="formulario-alterno">
+            ¿Ya tienes cuenta?
+            <button type="button" class="enlace" data-ir-a="seccion-login">Inicia sesión</button>
+          </p>
+        </form>
+      </div>
     </section>
 
-    <!-- ===== Inicio de sesión (Mateo, rama 6-iniciar-sesion) ===== -->
+    <!-- ===== Inicio de sesión (rama 6) ===== -->
     <section id="seccion-login" class="seccion oculto">
-      <h2>Iniciar sesión</h2>
-      <form id="login-formulario" novalidate>
-        <label for="login-usuario">Nombre de usuario</label>
-        <input type="text" id="login-usuario" autocomplete="username">
+      <div class="acceso">
+        <aside class="acceso-marca">
+          <h2>Bienvenido de nuevo</h2>
+          <p>Por tu seguridad, después de tres intentos fallidos la cuenta se bloquea durante cinco minutos.</p>
+        </aside>
 
-        <label for="login-contrasena">Contraseña</label>
-        <input type="password" id="login-contrasena" autocomplete="current-password">
+        <form id="login-formulario" class="formulario" novalidate>
+          <div class="campo">
+            <label for="login-usuario">Nombre de usuario</label>
+            <input type="text" id="login-usuario" autocomplete="username">
+          </div>
 
-        <!-- Contador visible de intentos (lo pide el profesor) -->
-        <p id="login-intentos" class="oculto"></p>
+          <div class="campo">
+            <label for="login-contrasena">Contraseña</label>
+            <input type="password" id="login-contrasena" autocomplete="current-password">
+          </div>
 
-        <button type="submit" class="boton-principal">Entrar</button>
-      </form>
+          <!-- Contador visible de intentos (lo pide el profesor) -->
+          <p id="login-intentos" class="intentos oculto"></p>
+
+          <button type="submit" class="boton-principal boton-ancho">Entrar</button>
+          <p class="formulario-alterno">
+            ¿Todavía no eres cliente?
+            <button type="button" class="enlace" data-ir-a="seccion-registro">Abre tu cuenta</button>
+          </p>
+        </form>
+      </div>
     </section>
 
-    <!-- ===== Panel de transacciones (requiere sesión) ===== -->
+    <!-- ===== Panel de transacciones (rama 48) ===== -->
     <section id="seccion-panel" class="seccion oculto">
-      <h2>Hola, <span id="panel-nombre"></span></h2>
+      <div class="panel">
+        <div class="panel-cabecera">
+          <h2 class="panel-saludo">Hola, <span id="panel-nombre"></span></h2>
+          <div class="campo panel-selector">
+            <label for="panel-cuenta">Cuenta</label>
+            <select id="panel-cuenta"></select>
+          </div>
+        </div>
 
-      <label for="panel-cuenta">Cuenta</label>
-      <select id="panel-cuenta"></select>
+        <nav class="menu-panel" aria-label="Operaciones">
+          <button type="button" data-ver="vista-saldo">Saldo</button>
+          <button type="button" data-ver="vista-consignar">Consignar</button>
+          <button type="button" data-ver="vista-retirar">Retirar</button>
+          <button type="button" data-ver="vista-movimientos">Movimientos</button>
+          <button type="button" id="panel-cerrar-sesion" class="menu-panel-salir">Cerrar sesión</button>
+        </nav>
 
-      <nav class="menu-panel">
-        <button type="button" data-ver="vista-saldo">Consultar saldo</button>
-        <button type="button" data-ver="vista-consignar">Consignar</button>
-        <button type="button" data-ver="vista-retirar">Retirar</button>
-        <button type="button" data-ver="vista-movimientos">Movimientos</button>
-        <button type="button" id="panel-cerrar-sesion">Cerrar sesión</button>
-      </nav>
+        <!-- Consultar saldo (rama 11) -->
+        <div id="vista-saldo" class="vista oculto">
+          <h3>Saldo disponible</h3>
+          <p id="saldo-fecha" class="saldo-fecha"></p>
+          <p id="saldo-valor" class="saldo"></p>
+        </div>
 
-      <!-- Consultar saldo (Sebastián, rama 11) -->
-      <div id="vista-saldo" class="vista oculto">
-        <h3>Saldo</h3>
-        <p id="saldo-fecha"></p>
-        <p id="saldo-valor"></p>
-      </div>
+        <!-- Consignar (rama 12) -->
+        <div id="vista-consignar" class="vista oculto">
+          <h3>Consignar dinero</h3>
+          <form id="consignar-formulario" class="formulario formulario-operacion" novalidate>
+            <div class="campo">
+              <label for="consignar-monto">Monto</label>
+              <input type="text" id="consignar-monto" class="campo-monto" inputmode="numeric" autocomplete="off" placeholder="0">
+            </div>
+            <button type="submit" class="boton-principal">Consignar</button>
+          </form>
+        </div>
 
-      <!-- Consignar (Juan, rama 12) -->
-      <div id="vista-consignar" class="vista oculto">
-        <h3>Consignar dinero</h3>
-        <form id="consignar-formulario" novalidate>
-          <label for="consignar-monto">Monto</label>
-          <input type="text" id="consignar-monto" class="campo-monto" inputmode="numeric" autocomplete="off">
-          <button type="submit" class="boton-principal">Consignar</button>
-        </form>
-      </div>
+        <!-- Retirar (rama 13) -->
+        <div id="vista-retirar" class="vista oculto">
+          <h3>Retirar dinero</h3>
+          <form id="retirar-formulario" class="formulario formulario-operacion" novalidate>
+            <div class="campo">
+              <label for="retirar-monto">Monto</label>
+              <input type="text" id="retirar-monto" class="campo-monto" inputmode="numeric" autocomplete="off" placeholder="0">
+            </div>
+            <button type="submit" class="boton-principal">Retirar</button>
+          </form>
+        </div>
 
-      <!-- Retirar (Juan, rama 13) -->
-      <div id="vista-retirar" class="vista oculto">
-        <h3>Retirar dinero</h3>
-        <form id="retirar-formulario" novalidate>
-          <label for="retirar-monto">Monto</label>
-          <input type="text" id="retirar-monto" class="campo-monto" inputmode="numeric" autocomplete="off">
-          <button type="submit" class="boton-principal">Retirar</button>
-        </form>
-      </div>
-
-      <!-- Movimientos (Sebastián, rama 32) -->
-      <div id="vista-movimientos" class="vista oculto">
-        <h3>Movimientos</h3>
-        <ul id="movimientos-lista"></ul>
+        <!-- Movimientos (rama 32) -->
+        <div id="vista-movimientos" class="vista oculto">
+          <h3>Movimientos</h3>
+          <ul id="movimientos-lista" class="movimientos"></ul>
+        </div>
       </div>
     </section>
 
   </main>
 
   <footer class="pie">
-    <p>© Mi Plata — Proyecto académico CESDE</p>
+    <div class="pie-contenido">
+      <div class="pie-marca">
+        <span class="marca-nombre">DigiBank</span>
+        <p>Medellín, Colombia. Atención al cliente de lunes a viernes, de 8:00 a.&nbsp;m. a 6:00 p.&nbsp;m.</p>
+      </div>
+      <nav class="pie-redes" aria-label="Redes sociales">
+        <a href="#" rel="noopener">Instagram</a>
+        <a href="#" rel="noopener">Facebook</a>
+        <a href="#" rel="noopener">LinkedIn</a>
+        <a href="#" rel="noopener">X</a>
+      </nav>
+    </div>
+    <p class="pie-legal">© 2026 DigiBank. Proyecto académico de CESDE: banco simulado que no maneja dinero real.</p>
   </footer>
 
   <!-- ===== Scripts: el ORDEN importa (ver contrato) ===== -->
