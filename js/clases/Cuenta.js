@@ -15,7 +15,7 @@ class Cuenta {
 
   constructor(numero, tipo) {
     this.numero = numero; // texto, lo asigna Banco
-    this.tipo = tipo;     // "ahorros" o "corriente"
+    this.tipo = tipo;     // "ahorros", "corriente" o "credito"
     this.#saldo = 0;
     this.#movimientos = [];
   }
@@ -40,7 +40,7 @@ class Cuenta {
     this.#saldo = this.#saldo + monto;
 
     // Paso 3: registrar el movimiento (solo después de que todo salió bien)
-    this.#registrarMovimiento("consignacion", monto);
+    this.#registrarMovimiento(this.tipoMovimientoConsignacion(), monto);
 
     return crearRespuesta(
       "exito",
@@ -81,7 +81,7 @@ class Cuenta {
 
     // Paso 4: descontar y registrar (solo si todo salió bien)
     this.#saldo = this.#saldo - totalADescontar;
-    this.#registrarMovimiento("retiro", totalADescontar);
+    this.#registrarMovimiento(this.tipoMovimientoRetiro(), totalADescontar);
 
     return crearRespuesta(
       "exito",
@@ -94,6 +94,17 @@ class Cuenta {
   // En la clase padre, el saldo disponible.
   limiteRetiro() {
     return this.#saldo;
+  }
+
+  // Métodos polimórficos: con qué nombre queda cada operación en el
+  // historial. TarjetaCredito los redefine: un retiro es una "compra" y
+  // una consignación es un "pago".
+  tipoMovimientoConsignacion() {
+    return "consignacion";
+  }
+
+  tipoMovimientoRetiro() {
+    return "retiro";
   }
 
   // Método polimórfico: interés que se aplica al retirar.

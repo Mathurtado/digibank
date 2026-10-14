@@ -91,7 +91,7 @@
           </li>
           <li>
             <h3>Elige tus productos</h3>
-            <p>Cuenta de ahorros, cuenta corriente o ambas.</p>
+            <p>Cuenta de ahorros, cuenta corriente o ambas, y si quieres, tu tarjeta de crédito.</p>
           </li>
           <li>
             <h3>Maneja tu dinero</h3>
@@ -170,6 +170,11 @@
             </label>
           </fieldset>
 
+          <label class="opcion opcion-tarjeta">
+            <input type="checkbox" id="registro-tarjeta">
+            <span>Quiero una tarjeta de crédito, con cupo de $2.000.000</span>
+          </label>
+
           <button type="submit" class="boton-principal boton-ancho">Registrarme</button>
           <p class="formulario-alterno">
             ¿Ya tienes cuenta?
@@ -226,6 +231,7 @@
           <button type="button" data-ver="vista-consignar">Consignar</button>
           <button type="button" data-ver="vista-retirar">Retirar</button>
           <button type="button" data-ver="vista-movimientos">Movimientos</button>
+          <button type="button" data-ver="vista-tarjeta">Tarjeta</button>
           <button type="button" id="panel-cerrar-sesion" class="menu-panel-salir">Cerrar sesión</button>
         </nav>
 
@@ -265,6 +271,65 @@
           <h3>Movimientos</h3>
           <ul id="movimientos-lista" class="movimientos"></ul>
         </div>
+
+        <!-- Tarjeta de crédito (ramas 38 a 41) -->
+        <div id="vista-tarjeta" class="vista oculto">
+          <h3>Tarjeta de crédito</h3>
+          <p id="tarjeta-sin-tarjeta" class="ayuda oculto">No tienes tarjeta de crédito.</p>
+
+          <div id="tarjeta-contenido">
+            <dl class="tarjeta-resumen">
+              <div>
+                <dt>Cupo total</dt>
+                <dd id="tarjeta-cupo"></dd>
+              </div>
+              <div>
+                <dt>Deuda</dt>
+                <dd id="tarjeta-deuda"></dd>
+              </div>
+              <div>
+                <dt>Cupo disponible</dt>
+                <dd id="tarjeta-disponible"></dd>
+              </div>
+              <div>
+                <dt>Pago mensual estimado</dt>
+                <dd id="tarjeta-pago-mensual"></dd>
+              </div>
+            </dl>
+
+            <h4>Comprar en cuotas</h4>
+            <form id="tarjeta-compra-formulario" class="formulario" novalidate>
+              <div class="campo">
+                <label for="tarjeta-descripcion">Descripción (opcional)</label>
+                <input type="text" id="tarjeta-descripcion" maxlength="40" autocomplete="off">
+              </div>
+              <div class="formulario-fila">
+                <div class="campo">
+                  <label for="tarjeta-monto">Monto</label>
+                  <input type="text" id="tarjeta-monto" class="campo-monto" inputmode="numeric" autocomplete="off" placeholder="0">
+                </div>
+                <div class="campo">
+                  <label for="tarjeta-cuotas">Número de cuotas</label>
+                  <select id="tarjeta-cuotas"></select>
+                </div>
+              </div>
+              <p id="tarjeta-simulacion" class="tarjeta-simulacion" aria-live="polite"></p>
+              <button type="submit" class="boton-principal">Comprar</button>
+            </form>
+
+            <h4>Pagar la tarjeta</h4>
+            <form id="tarjeta-pago-formulario" class="formulario formulario-operacion" novalidate>
+              <div class="campo">
+                <label for="tarjeta-pago-monto">Monto a pagar</label>
+                <input type="text" id="tarjeta-pago-monto" class="campo-monto" inputmode="numeric" autocomplete="off" placeholder="0">
+              </div>
+              <button type="submit" class="boton-principal">Pagar</button>
+            </form>
+
+            <h4>Compras</h4>
+            <ul id="tarjeta-compras" class="movimientos"></ul>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -291,12 +356,14 @@
   <script src="js/clases/Cuenta.js"></script>
   <script src="js/clases/CuentaAhorros.js"></script>
   <script src="js/clases/CuentaCorriente.js"></script>
+  <script src="js/clases/TarjetaCredito.js"></script>
   <script src="js/clases/Cliente.js"></script>
   <script src="js/clases/Banco.js"></script>
   <script src="js/interfaz/registro.js"></script>
   <script src="js/interfaz/iniciarSesion.js"></script>
   <script src="js/interfaz/operaciones.js"></script>
   <script src="js/interfaz/consultas.js"></script>
+  <script src="js/interfaz/tarjeta.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
