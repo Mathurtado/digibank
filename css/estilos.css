@@ -678,7 +678,8 @@ input.campo-monto {
 .panel:has(#vista-saldo:not(.oculto)) [data-ver="vista-saldo"],
 .panel:has(#vista-consignar:not(.oculto)) [data-ver="vista-consignar"],
 .panel:has(#vista-retirar:not(.oculto)) [data-ver="vista-retirar"],
-.panel:has(#vista-movimientos:not(.oculto)) [data-ver="vista-movimientos"] {
+.panel:has(#vista-movimientos:not(.oculto)) [data-ver="vista-movimientos"],
+.panel:has(#vista-tarjeta:not(.oculto)) [data-ver="vista-tarjeta"] {
   color: var(--verde);
   border-bottom-color: var(--laton);
 }
@@ -748,7 +749,7 @@ input.campo-monto {
 /* Columnas para cuando consultas.js use estas clases */
 .movimiento {
   display: grid;
-  grid-template-columns: 11rem 1fr auto auto;
+  grid-template-columns: 13.5rem 1fr auto auto;
   gap: var(--e-4);
   align-items: baseline;
 }
@@ -774,6 +775,53 @@ input.campo-monto {
 
 .movimiento-vacio {
   color: var(--pizarra);
+}
+
+/* Tarjeta de crédito */
+.opcion-tarjeta {
+  margin-top: calc(-1 * var(--e-1));
+}
+
+.vista h4 {
+  margin: var(--e-6) 0 var(--e-3);
+  font-family: var(--fuente-titulo);
+  font-weight: 400;
+  font-size: var(--t-medio);
+  color: var(--verde);
+}
+
+.tarjeta-resumen {
+  margin: var(--e-5) 0 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--tinta);
+}
+
+.tarjeta-resumen div {
+  padding: var(--e-4) var(--e-4) 0 0;
+}
+
+.tarjeta-resumen div + div {
+  padding-left: var(--e-4);
+  border-left: 1px solid var(--linea);
+}
+
+.tarjeta-resumen dt {
+  font-size: var(--t-pequeno);
+  color: var(--pizarra);
+}
+
+.tarjeta-resumen dd {
+  margin: var(--e-1) 0 0;
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-grande);
+  color: var(--tinta);
+}
+
+.tarjeta-simulacion {
+  min-height: 1.5em;
+  color: var(--verde);
+  font-weight: 600;
 }
 
 /* ---------- 10. Pie de página ---------- */
@@ -846,6 +894,15 @@ input.campo-monto {
   .productos,
   .pasos-lista {
     grid-template-columns: 1fr;
+  }
+
+  .tarjeta-resumen {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .tarjeta-resumen div:nth-child(3) {
+    padding-left: 0;
+    border-left: 0;
   }
 
   .producto,

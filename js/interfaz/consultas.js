@@ -19,9 +19,14 @@ function actualizarSaldo() {
     month: "long",
     year: "numeric",
   }).format(fechaActual);
-  saldoValor.textContent = cuenta
-    ? formatearMoneda(cuenta.saldo)
-    : "No hay una cuenta seleccionada.";
+  if (!cuenta) {
+    saldoValor.textContent = "No hay una cuenta seleccionada.";
+  } else if (cuenta.tipo === TIPO_TARJETA) {
+    // La tarjeta no tiene saldo a favor: se muestra lo que se debe
+    saldoValor.textContent = "Deuda: " + formatearMoneda(cuenta.deuda);
+  } else {
+    saldoValor.textContent = formatearMoneda(cuenta.saldo);
+  }
 }
 
 function inicializarConsultas() {
@@ -37,7 +42,9 @@ function inicializarConsultas() {
     "consignacion": "Consignación",
     "retiro": "Retiro",
     "transferencia enviada": "Transferencia enviada",
-    "transferencia recibida": "Transferencia recibida"
+    "transferencia recibida": "Transferencia recibida",
+    "compra": "Compra con tarjeta",
+    "pago": "Pago de la tarjeta"
   };
   const lista = document.getElementById("movimientos-lista");
   const botonMovimientos = document.querySelector('[data-ver="vista-movimientos"]');

@@ -63,7 +63,7 @@ function actualizarPanel() {
   cliente.cuentas.forEach((cuenta) => {
     const opcion = document.createElement("option");
     opcion.value = cuenta.tipo;
-    opcion.textContent = "Cuenta de " + cuenta.tipo + " Nº " + cuenta.numero;
+    opcion.textContent = nombreProducto(cuenta.tipo) + " Nº " + cuenta.numero;
     selector.appendChild(opcion);
   });
 }
@@ -118,6 +118,7 @@ inicializarRegistro();     // interfaz/registro.js
 inicializarLogin();        // interfaz/iniciarSesion.js
 inicializarOperaciones();  // interfaz/operaciones.js
 inicializarConsultas();    // interfaz/consultas.js
+inicializarTarjeta();      // interfaz/tarjeta.js
 
 if (MODO_PRUEBA) {
   banco.cargarDatosDePrueba();

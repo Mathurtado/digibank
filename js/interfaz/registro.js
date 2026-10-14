@@ -29,6 +29,7 @@ function inicializarRegistro() {
       contrasena: document.getElementById("registro-contrasena").value,
       confirmacion: document.getElementById("registro-confirmacion").value,
       tiposCuenta: tiposCuenta,
+      solicitaTarjeta: document.getElementById("registro-tarjeta").checked,
     };
 
     const respuesta = banco.registrarCliente(datos);

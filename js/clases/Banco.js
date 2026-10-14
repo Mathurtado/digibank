@@ -17,7 +17,7 @@ class Banco {
 
   /**
    * datos: { tipoDocumento, identificacion, nombreCompleto, celular, correo,
-   *          usuario, contrasena, confirmacion, tiposCuenta }
+   *          usuario, contrasena, confirmacion, tiposCuenta, solicitaTarjeta }
    * Los datos llegan tal como se escribieron en el formulario.
    * Devuelve: crearRespuesta(...)
    */
@@ -35,10 +35,13 @@ class Banco {
     // Paso 3: crear el cliente con los datos ya limpios y validados
     const cliente = new Cliente(limpios);
 
-    // Paso 4: crear las cuentas que eligió
+    // Paso 4: crear las cuentas que eligió y, si la pidió, la tarjeta
     limpios.tiposCuenta.forEach((tipo) => {
       cliente.agregarCuenta(this.crearCuenta(tipo));
     });
+    if (limpios.solicitaTarjeta) {
+      cliente.agregarCuenta(this.crearCuenta(TIPO_TARJETA));
+    }
 
     // Paso 5: guardarlo. Solo se llega aquí si todo fue válido.
     this.#clientes.push(cliente);
@@ -89,6 +92,7 @@ class Banco {
       contrasena: String(datos.contrasena || ""),
       confirmacion: String(datos.confirmacion || ""),
       tiposCuenta: Array.isArray(datos.tiposCuenta) ? datos.tiposCuenta : [],
+      solicitaTarjeta: datos.solicitaTarjeta === true,
     };
   }
 
@@ -285,8 +289,11 @@ class Banco {
 
   // ---------- Cuentas (listo en el esqueleto: lo usan todos) ----------
 
-  // Crea una CuentaAhorros o CuentaCorriente con un número nuevo.
+  // Crea una CuentaAhorros, CuentaCorriente o TarjetaCredito con un número nuevo.
   crearCuenta(tipo) {
+    if (!TIPOS_CUENTA.includes(tipo) && tipo !== TIPO_TARJETA) {
+      return null;
+    }
     const numero = String(this.#siguienteNumeroCuenta).padStart(6, "0");
     this.#siguienteNumeroCuenta++;
     if (tipo === "ahorros") {
@@ -295,7 +302,7 @@ class Banco {
     if (tipo === "corriente") {
       return new CuentaCorriente(numero);
     }
-    return null;
+    return new TarjetaCredito(numero);
   }
 
   // ---------- Datos de prueba (BORRAR antes de la entrega final) ----------
@@ -315,6 +322,7 @@ class Banco {
     });
     cliente.agregarCuenta(this.crearCuenta("ahorros"));
     cliente.agregarCuenta(this.crearCuenta("corriente"));
+    cliente.agregarCuenta(this.crearCuenta(TIPO_TARJETA));
     this.#clientes.push(cliente);
     this.clienteActivo = cliente;
   }
