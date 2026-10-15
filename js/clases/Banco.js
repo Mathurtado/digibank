@@ -297,6 +297,7 @@ class Banco {
 
     // Paso 5: todo bien, se guarda el usuario nuevo
     cliente.usuario = usuario;
+    this.guardar(); // para que el cambio siga aunque se recargue la página
     return crearRespuesta("exito", "Tu usuario ahora es " + usuario + ".");
   }
 
@@ -327,6 +328,7 @@ class Banco {
 
     // Paso 4: todo bien, se guarda la contraseña nueva
     cliente.cambiarContrasena(textoNueva);
+    this.guardar(); // para que el cambio siga aunque se recargue la página
     return crearRespuesta("exito", "Tu contraseña se cambió correctamente.");
   }
 
@@ -422,8 +424,9 @@ class Banco {
 
   // Guarda todos los clientes y sus cuentas en el navegador.
   // La sesión (clienteActivo) NO se guarda: al recargar hay que volver a entrar.
-  // Se llama después de cada cambio: registro, intentos de login y, desde la
-  // interfaz, después de cada consignación, retiro, compra o pago exitoso.
+  // Se llama después de cada cambio: registro, intentos de login, cambios de
+  // usuario o contraseña en el perfil y, desde la interfaz, después de cada
+  // consignación, retiro, compra o pago exitoso.
   guardar() {
     const datos = {
       siguienteNumeroCuenta: this.#siguienteNumeroCuenta,
