@@ -165,45 +165,15 @@ class Banco {
     }
 
     // ----- Nombre de usuario -----
-    if (d.usuario === "") {
-      return crearRespuesta("error", "Ingresa un nombre de usuario.");
-    }
-    if (!/^[a-z0-9_]+$/.test(d.usuario)) {
-      return crearRespuesta(
-        "error",
-        "El usuario solo puede tener letras sin tildes, números y guion bajo, sin espacios."
-      );
-    }
-    if (d.usuario.length < MIN_CARACTERES_USUARIO || d.usuario.length > MAX_CARACTERES_USUARIO) {
-      return crearRespuesta(
-        "error",
-        "El usuario debe tener entre " + MIN_CARACTERES_USUARIO + " y " + MAX_CARACTERES_USUARIO + " caracteres."
-      );
-    }
-    if (this.buscarPorUsuario(d.usuario) !== null) {
-      return crearRespuesta("error", "Ese nombre de usuario ya está en uso. Elige otro.");
+    const errorUsuario = this.#validarUsuario(d.usuario);
+    if (errorUsuario !== null) {
+      return errorUsuario;
     }
 
-    // ----- Contraseña -----
-    if (d.contrasena === "") {
-      return crearRespuesta("error", "Ingresa una contraseña.");
-    }
-    if (/\s/.test(d.contrasena)) {
-      return crearRespuesta("error", "La contraseña no puede tener espacios.");
-    }
-    if (d.contrasena.length < MIN_CARACTERES_CONTRASENA) {
-      return crearRespuesta(
-        "error",
-        "La contraseña debe tener al menos " + MIN_CARACTERES_CONTRASENA + " caracteres."
-      );
-    }
-    if (!/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(d.contrasena) || !/\d/.test(d.contrasena)) {
-      return crearRespuesta("error", "La contraseña debe tener al menos una letra y un número.");
-    }
-
-    // ----- Confirmación -----
-    if (d.confirmacion !== d.contrasena) {
-      return crearRespuesta("error", "Las contraseñas no coinciden.");
+    // ----- Contraseña y confirmación -----
+    const errorContrasena = this.#validarContrasena(d.contrasena, d.confirmacion);
+    if (errorContrasena !== null) {
+      return errorContrasena;
     }
 
     // ----- Tipo de cuenta -----
@@ -217,6 +187,119 @@ class Banco {
     }
 
     return null; // todo está bien
+  }
+
+  // ---------- Reglas compartidas por el registro y el perfil ----------
+
+  // Revisa un nombre de usuario que ya viene en minúsculas y sin espacios
+  // sobrantes. Devuelve una respuesta de error, o null si sirve.
+  #validarUsuario(usuario) {
+    if (usuario === "") {
+      return crearRespuesta("error", "Ingresa un nombre de usuario.");
+    }
+    if (!/^[a-z0-9_]+$/.test(usuario)) {
+      return crearRespuesta(
+        "error",
+        "El usuario solo puede tener letras sin tildes, números y guion bajo, sin espacios."
+      );
+    }
+    if (usuario.length < MIN_CARACTERES_USUARIO || usuario.length > MAX_CARACTERES_USUARIO) {
+      return crearRespuesta(
+        "error",
+        "El usuario debe tener entre " + MIN_CARACTERES_USUARIO + " y " + MAX_CARACTERES_USUARIO + " caracteres."
+      );
+    }
+    if (this.buscarPorUsuario(usuario) !== null) {
+      return crearRespuesta("error", "Ese nombre de usuario ya está en uso. Elige otro.");
+    }
+    return null;
+  }
+
+  // Revisa una contraseña nueva y su confirmación.
+  // Devuelve una respuesta de error, o null si sirve.
+  #validarContrasena(contrasena, confirmacion) {
+    if (contrasena === "") {
+      return crearRespuesta("error", "Ingresa una contraseña.");
+    }
+    if (/\s/.test(contrasena)) {
+      return crearRespuesta("error", "La contraseña no puede tener espacios.");
+    }
+    if (contrasena.length < MIN_CARACTERES_CONTRASENA) {
+      return crearRespuesta(
+        "error",
+        "La contraseña debe tener al menos " + MIN_CARACTERES_CONTRASENA + " caracteres."
+      );
+    }
+    if (!/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(contrasena) || !/\d/.test(contrasena)) {
+      return crearRespuesta("error", "La contraseña debe tener al menos una letra y un número.");
+    }
+    if (confirmacion !== contrasena) {
+      return crearRespuesta("error", "Las contraseñas no coinciden.");
+    }
+    return null;
+  }
+
+  // ---------- Perfil: cambiar usuario y contraseña ----------
+
+  /**
+   * Cambia el nombre de usuario del cliente que inició sesión.
+   * Pide la contraseña actual para confirmar que es el dueño de la cuenta.
+   * Devuelve: crearRespuesta(...)
+   */
+  cambiarUsuario(nuevoUsuario, contrasenaActual) {
+    // Paso 1: tiene que haber una sesión abierta
+    const cliente = this.clienteActivo;
+    if (cliente === null) {
+      return crearRespuesta("error", "Inicia sesión para cambiar tus datos.");
+    }
+
+    // Paso 2: limpiar el usuario igual que en el registro
+    const usuario = String(nuevoUsuario || "").trim().toLowerCase();
+
+    // Paso 3: confirmar que quien escribe es el dueño de la cuenta
+    if (!cliente.verificarContrasena(String(contrasenaActual || ""))) {
+      return crearRespuesta("error", "La contraseña actual es incorrecta.");
+    }
+
+    // Paso 4: mismas reglas que en el registro
+    const error = this.#validarUsuario(usuario);
+    if (error !== null) {
+      return error;
+    }
+
+    // Paso 5: todo bien, se guarda el usuario nuevo
+    cliente.usuario = usuario;
+    return crearRespuesta("exito", "Tu usuario ahora es " + usuario + ".");
+  }
+
+  /**
+   * Cambia la contraseña del cliente que inició sesión.
+   * Pide la contraseña actual para confirmar que es el dueño de la cuenta.
+   * Devuelve: crearRespuesta(...)
+   */
+  cambiarContrasena(contrasenaActual, nueva, confirmacion) {
+    // Paso 1: tiene que haber una sesión abierta
+    const cliente = this.clienteActivo;
+    if (cliente === null) {
+      return crearRespuesta("error", "Inicia sesión para cambiar tus datos.");
+    }
+
+    // Paso 2: confirmar que quien escribe es el dueño de la cuenta
+    if (!cliente.verificarContrasena(String(contrasenaActual || ""))) {
+      return crearRespuesta("error", "La contraseña actual es incorrecta.");
+    }
+
+    // Paso 3: mismas reglas que en el registro.
+    // La contraseña NO se limpia: un espacio es un error que hay que avisar.
+    const textoNueva = String(nueva || "");
+    const error = this.#validarContrasena(textoNueva, String(confirmacion || ""));
+    if (error !== null) {
+      return error;
+    }
+
+    // Paso 4: todo bien, se guarda la contraseña nueva
+    cliente.cambiarContrasena(textoNueva);
+    return crearRespuesta("exito", "Tu contraseña se cambió correctamente.");
   }
 
   // ---------- Inicio de sesión (Mateo, rama 6-iniciar-sesion) ----------
