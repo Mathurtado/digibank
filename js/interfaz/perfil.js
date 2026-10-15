@@ -1,36 +1,16 @@
 // =============================================================
-// interfaz/perfil.js — Muestra los datos del cliente y conecta los
-// formularios para cambiar el usuario y la contraseña.
+// interfaz/perfil.js — Muestra los datos del cliente y conecta el
+// formulario para cambiar la contraseña.
 // Esta capa NO valida reglas: solo lee los campos, llama a Banco
 // y muestra la respuesta.
 // =============================================================
 
 function inicializarPerfil() {
-  // ----- Cambiar nombre de usuario -----
-  const formularioUsuario = document.getElementById("perfil-usuario-formulario");
-
-  formularioUsuario.addEventListener("submit", (evento) => {
-    evento.preventDefault(); // evita que la página se recargue
-
-    const respuesta = banco.cambiarUsuario(
-      document.getElementById("perfil-nuevo-usuario").value,
-      document.getElementById("perfil-usuario-contrasena").value
-    );
-
-    if (respuesta.tipo === "exito") {
-      formularioUsuario.reset();
-      actualizarPerfil(); // para que se vea el usuario nuevo
-    }
-    // La contraseña se borra siempre, aunque haya error
-    document.getElementById("perfil-usuario-contrasena").value = "";
-    mostrarMensaje(respuesta);
-  });
-
   // ----- Cambiar contraseña -----
   const formularioContrasena = document.getElementById("perfil-contrasena-formulario");
 
   formularioContrasena.addEventListener("submit", (evento) => {
-    evento.preventDefault();
+    evento.preventDefault(); // evita que la página se recargue
 
     const respuesta = banco.cambiarContrasena(
       document.getElementById("perfil-contrasena-actual").value,

@@ -188,9 +188,23 @@ class Banco {
     }
 
     // ----- Nombre de usuario -----
-    const errorUsuario = this.#validarUsuario(d.usuario);
-    if (errorUsuario !== null) {
-      return errorUsuario;
+    if (d.usuario === "") {
+      return crearRespuesta("error", "Ingresa un nombre de usuario.");
+    }
+    if (!/^[a-z0-9_]+$/.test(d.usuario)) {
+      return crearRespuesta(
+        "error",
+        "El usuario solo puede tener letras sin tildes, números y guion bajo, sin espacios."
+      );
+    }
+    if (d.usuario.length < MIN_CARACTERES_USUARIO || d.usuario.length > MAX_CARACTERES_USUARIO) {
+      return crearRespuesta(
+        "error",
+        "El usuario debe tener entre " + MIN_CARACTERES_USUARIO + " y " + MAX_CARACTERES_USUARIO + " caracteres."
+      );
+    }
+    if (this.buscarPorUsuario(d.usuario) !== null) {
+      return crearRespuesta("error", "Ese nombre de usuario ya está en uso. Elige otro.");
     }
 
     // ----- Contraseña y confirmación -----
@@ -217,31 +231,7 @@ class Banco {
     return null; // todo está bien
   }
 
-  // ---------- Reglas compartidas por el registro y el perfil ----------
-
-  // Revisa un nombre de usuario que ya viene en minúsculas y sin espacios
-  // sobrantes. Devuelve una respuesta de error, o null si sirve.
-  #validarUsuario(usuario) {
-    if (usuario === "") {
-      return crearRespuesta("error", "Ingresa un nombre de usuario.");
-    }
-    if (!/^[a-z0-9_]+$/.test(usuario)) {
-      return crearRespuesta(
-        "error",
-        "El usuario solo puede tener letras sin tildes, números y guion bajo, sin espacios."
-      );
-    }
-    if (usuario.length < MIN_CARACTERES_USUARIO || usuario.length > MAX_CARACTERES_USUARIO) {
-      return crearRespuesta(
-        "error",
-        "El usuario debe tener entre " + MIN_CARACTERES_USUARIO + " y " + MAX_CARACTERES_USUARIO + " caracteres."
-      );
-    }
-    if (this.buscarPorUsuario(usuario) !== null) {
-      return crearRespuesta("error", "Ese nombre de usuario ya está en uso. Elige otro.");
-    }
-    return null;
-  }
+  // ---------- Regla de contraseña: la usan el registro y el perfil ----------
 
   // Revisa una contraseña nueva y su confirmación.
   // Devuelve una respuesta de error, o null si sirve.
@@ -267,39 +257,7 @@ class Banco {
     return null;
   }
 
-  // ---------- Perfil: cambiar usuario y contraseña ----------
-
-  /**
-   * Cambia el nombre de usuario del cliente que inició sesión.
-   * Pide la contraseña actual para confirmar que es el dueño de la cuenta.
-   * Devuelve: crearRespuesta(...)
-   */
-  cambiarUsuario(nuevoUsuario, contrasenaActual) {
-    // Paso 1: tiene que haber una sesión abierta
-    const cliente = this.clienteActivo;
-    if (cliente === null) {
-      return crearRespuesta("error", "Inicia sesión para cambiar tus datos.");
-    }
-
-    // Paso 2: limpiar el usuario igual que en el registro
-    const usuario = String(nuevoUsuario || "").trim().toLowerCase();
-
-    // Paso 3: confirmar que quien escribe es el dueño de la cuenta
-    if (!cliente.verificarContrasena(String(contrasenaActual || ""))) {
-      return crearRespuesta("error", "La contraseña actual es incorrecta.");
-    }
-
-    // Paso 4: mismas reglas que en el registro
-    const error = this.#validarUsuario(usuario);
-    if (error !== null) {
-      return error;
-    }
-
-    // Paso 5: todo bien, se guarda el usuario nuevo
-    cliente.usuario = usuario;
-    this.guardar(); // para que el cambio siga aunque se recargue la página
-    return crearRespuesta("exito", "Tu usuario ahora es " + usuario + ".");
-  }
+  // ---------- Perfil: cambiar contraseña ----------
 
   /**
    * Cambia la contraseña del cliente que inició sesión.
@@ -424,8 +382,8 @@ class Banco {
 
   // Guarda todos los clientes y sus cuentas en el navegador.
   // La sesión (clienteActivo) NO se guarda: al recargar hay que volver a entrar.
-  // Se llama después de cada cambio: registro, intentos de login, cambios de
-  // usuario o contraseña en el perfil y, desde la interfaz, después de cada
+  // Se llama después de cada cambio: registro, intentos de login, cambio de
+  // contraseña en el perfil y, desde la interfaz, después de cada
   // consignación, retiro, compra o pago exitoso.
   guardar() {
     const datos = {
