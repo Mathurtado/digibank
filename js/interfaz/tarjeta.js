@@ -114,6 +114,7 @@ function inicializarTarjeta() {
       campoMonto.value = "";
       campoDescripcion.value = "";
       textoSimulacion.textContent = "";
+      banco.guardar();
     }
     mostrarTarjeta();
   });
@@ -131,6 +132,7 @@ function inicializarTarjeta() {
     mostrarMensaje(respuesta);
     if (respuesta.tipo === "exito") {
       campoPago.value = "";
+      banco.guardar();
     }
     mostrarTarjeta();
   });

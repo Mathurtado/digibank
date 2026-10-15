@@ -17,7 +17,9 @@ class Banco {
 
   /**
    * datos: { tipoDocumento, identificacion, nombreCompleto, celular, correo,
-   *          usuario, contrasena, confirmacion, tiposCuenta, solicitaTarjeta }
+   *          usuario, contrasena, confirmacion, tiposCuenta, solicitaTarjeta,
+   *          saldoInicial }
+   *   saldoInicial: texto del campo ("150.000") o número. Vacío = $0
    * Los datos llegan tal como se escribieron en el formulario.
    * Devuelve: crearRespuesta(...)
    */
@@ -43,8 +45,16 @@ class Banco {
       cliente.agregarCuenta(this.crearCuenta(TIPO_TARJETA));
     }
 
-    // Paso 5: guardarlo. Solo se llega aquí si todo fue válido.
+    // Paso 5: saldo inicial. Se consigna en ahorros si la eligió; si no, en
+    // corriente. Se usa consignar() para que quede como primer movimiento.
+    if (limpios.saldoInicial > 0) {
+      const cuentaInicial = cliente.obtenerCuenta("ahorros") || cliente.obtenerCuenta("corriente");
+      cuentaInicial.consignar(limpios.saldoInicial);
+    }
+
+    // Paso 6: guardarlo. Solo se llega aquí si todo fue válido.
     this.#clientes.push(cliente);
+    this.guardar();
 
     return crearRespuesta(
       "exito",
@@ -93,7 +103,20 @@ class Banco {
       confirmacion: String(datos.confirmacion || ""),
       tiposCuenta: Array.isArray(datos.tiposCuenta) ? datos.tiposCuenta : [],
       solicitaTarjeta: datos.solicitaTarjeta === true,
+      // Vacío = $0. El campo ya solo deja escribir dígitos y puntos de miles.
+      // Si llega un número (por ejemplo desde la consola), se respeta.
+      saldoInicial: this.#convertirSaldoInicial(datos.saldoInicial),
     };
+  }
+
+  // "" -> 0, "150.000" -> 150000. Un número se deja igual para que la
+  // validación decida si sirve (decimales o negativos se rechazan).
+  #convertirSaldoInicial(valor) {
+    if (typeof valor === "number") {
+      return valor;
+    }
+    const texto = String(valor || "").trim();
+    return texto === "" ? 0 : convertirMonto(texto);
   }
 
   // Revisa los datos en el orden del formulario.
@@ -184,6 +207,11 @@ class Banco {
     const sinRepetir = new Set(d.tiposCuenta).size === d.tiposCuenta.length;
     if (!tiposValidos || !sinRepetir) {
       return crearRespuesta("error", "Los tipos de cuenta elegidos no son válidos.");
+    }
+
+    // ----- Saldo inicial (opcional) -----
+    if (!Number.isInteger(d.saldoInicial) || d.saldoInicial < 0) {
+      return crearRespuesta("error", "El saldo inicial debe ser un número entero de $0 o más.");
     }
 
     return null; // todo está bien
@@ -334,6 +362,7 @@ class Banco {
     // Paso 4: contraseña incorrecta. Se suma el intento.
     if (!cliente.verificarContrasena(textoContrasena)) {
       cliente.registrarIntentoFallido();
+      this.guardar(); // así el bloqueo sigue aunque se recargue la página
 
       // Si con este intento llegó al máximo, se avisa del bloqueo de inmediato
       if (cliente.estaBloqueado()) {
@@ -347,6 +376,7 @@ class Banco {
 
     // Paso 5: todo bien. Se reinicia el contador y se abre la sesión.
     cliente.reiniciarIntentos();
+    this.guardar();
     this.clienteActivo = cliente;
     return crearRespuesta("exito", "Bienvenido, " + cliente.nombreCompleto + ".", {
       intentosRestantes: MAX_INTENTOS,
@@ -388,12 +418,84 @@ class Banco {
     return new TarjetaCredito(numero);
   }
 
+  // ---------- Almacenamiento (localStorage) ----------
+
+  // Guarda todos los clientes y sus cuentas en el navegador.
+  // La sesión (clienteActivo) NO se guarda: al recargar hay que volver a entrar.
+  // Se llama después de cada cambio: registro, intentos de login y, desde la
+  // interfaz, después de cada consignación, retiro, compra o pago exitoso.
+  guardar() {
+    const datos = {
+      siguienteNumeroCuenta: this.#siguienteNumeroCuenta,
+      clientes: this.#clientes.map((cliente) => cliente.aDatos()),
+    };
+    try {
+      localStorage.setItem(CLAVE_ALMACENAMIENTO, JSON.stringify(datos));
+    } catch (error) {
+      // Navegador sin almacenamiento (modo privado o lleno): la app sigue
+      // funcionando, solo que los datos se pierden al recargar.
+      console.warn("No se pudieron guardar los datos:", error);
+    }
+  }
+
+  // Carga los clientes guardados. Si no hay nada guardado o los datos están
+  // dañados, el banco queda vacío. Se llama una sola vez, al arrancar (app.js).
+  cargar() {
+    try {
+      const texto = localStorage.getItem(CLAVE_ALMACENAMIENTO);
+      if (texto === null) {
+        return;
+      }
+      const datos = JSON.parse(texto);
+      this.#clientes = datos.clientes.map((d) => this.#reconstruirCliente(d));
+      this.#siguienteNumeroCuenta = datos.siguienteNumeroCuenta;
+    } catch (error) {
+      console.warn("No se pudieron cargar los datos guardados:", error);
+      this.#clientes = [];
+      this.#siguienteNumeroCuenta = 1;
+    }
+  }
+
+  // Crea de nuevo un Cliente (con sus métodos) a partir de los datos guardados.
+  #reconstruirCliente(datos) {
+    const cliente = new Cliente(datos);
+    cliente.intentosFallidos = datos.intentosFallidos;
+    cliente.bloqueadoHasta = datos.bloqueadoHasta;
+    datos.cuentas.forEach((d) => {
+      cliente.agregarCuenta(this.#reconstruirCuenta(d));
+    });
+    return cliente;
+  }
+
+  // Crea la clase correcta según el tipo guardado y le devuelve su saldo,
+  // sus movimientos y, si es tarjeta, sus compras.
+  #reconstruirCuenta(datos) {
+    let cuenta;
+    if (datos.tipo === "ahorros") {
+      cuenta = new CuentaAhorros(datos.numero);
+    } else if (datos.tipo === "corriente") {
+      cuenta = new CuentaCorriente(datos.numero);
+    } else {
+      cuenta = new TarjetaCredito(datos.numero, datos.cupo);
+      TarjetaCredito.restaurarCompras(cuenta, datos.compras);
+    }
+    Cuenta.restaurar(cuenta, datos);
+    return cuenta;
+  }
+
   // ---------- Datos de prueba (BORRAR antes de la entrega final) ----------
 
   // Crea un cliente para que Juan y Sebastián puedan probar sin esperar
   // el registro. Usuario: prueba / Contraseña: prueba123
   // Además deja la sesión iniciada con ese cliente.
+  // Si ya estaba guardado (de una visita anterior), lo reutiliza.
   cargarDatosDePrueba() {
+    const guardado = this.buscarPorUsuario("prueba");
+    if (guardado !== null) {
+      this.clienteActivo = guardado;
+      return;
+    }
+
     const cliente = new Cliente({
       tipoDocumento: "cedula",
       identificacion: "1000000000",
@@ -407,6 +509,7 @@ class Banco {
     cliente.agregarCuenta(this.crearCuenta("corriente"));
     cliente.agregarCuenta(this.crearCuenta(TIPO_TARJETA));
     this.#clientes.push(cliente);
+    this.guardar();
     this.clienteActivo = cliente;
   }
 }

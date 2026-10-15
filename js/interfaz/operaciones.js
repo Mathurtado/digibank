@@ -8,7 +8,7 @@
 //   3. const monto = convertirMonto(campo.value);
 //   4. const respuesta = cuenta.consignar(monto);   // o cuenta.retirar(monto)
 //   5. mostrarMensaje(respuesta);
-//   6. si fue "exito", limpiar el campo
+//   6. si fue "exito", limpiar el campo y llamar a banco.guardar()
 // Las validaciones del monto van en la clase Cuenta, no aquí.
 // =============================================================
 
@@ -29,6 +29,7 @@ function inicializarOperaciones() {
     mostrarMensaje(respuesta);
     if (respuesta.tipo === "exito") {
       campo.value = "";
+      banco.guardar();
     }
   });
 
@@ -48,6 +49,7 @@ function inicializarOperaciones() {
     mostrarMensaje(respuesta);
     if (respuesta.tipo === "exito") {
       campo.value = "";
+      banco.guardar();
     }
   });
 }

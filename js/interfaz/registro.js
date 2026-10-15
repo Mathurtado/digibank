@@ -30,6 +30,7 @@ function inicializarRegistro() {
       confirmacion: document.getElementById("registro-confirmacion").value,
       tiposCuenta: tiposCuenta,
       solicitaTarjeta: document.getElementById("registro-tarjeta").checked,
+      saldoInicial: document.getElementById("registro-saldo-inicial").value, // lo valida Banco
     };
 
     const respuesta = banco.registrarCliente(datos);
