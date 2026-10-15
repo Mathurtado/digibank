@@ -125,6 +125,35 @@ class Cuenta {
       .sort((a, b) => b.fecha - a.fecha);
   }
 
+  // ---------- Almacenamiento ----------
+
+  // Convierte la cuenta en un objeto simple para guardarlo con JSON.
+  // JSON.stringify no ve los campos privados (#), por eso se copian aquí.
+  // Las fechas se guardan como texto y se convierten de nuevo al cargar.
+  aDatos() {
+    return {
+      numero: this.numero,
+      tipo: this.tipo,
+      saldo: this.#saldo,
+      movimientos: this.#movimientos.map((movimiento) => ({
+        ...movimiento,
+        fecha: movimiento.fecha.toISOString(),
+      })),
+    };
+  }
+
+  // Devuelve a una cuenta recién creada el saldo y los movimientos guardados.
+  // Es static y está dentro de Cuenta, por eso puede escribir #saldo sin
+  // que exista un setter público (el encapsulamiento se mantiene).
+  // Solo la usa Banco al cargar los datos.
+  static restaurar(cuenta, datos) {
+    cuenta.#saldo = datos.saldo;
+    cuenta.#movimientos = datos.movimientos.map((movimiento) => ({
+      ...movimiento,
+      fecha: new Date(movimiento.fecha),
+    }));
+  }
+
   // Privado (#): solo consignar() y retirar() pueden llamarlo, después de
   // validar. Así nadie puede agregar un movimiento falso desde afuera.
   // Movimiento: { fecha, tipo, valor, saldoResultante }

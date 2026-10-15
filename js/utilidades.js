@@ -47,6 +47,11 @@ const NOMBRES_PRODUCTO = {
 };
 const TIPOS_DOCUMENTO = ["cedula", "pasaporte"];
 
+// ---------- Almacenamiento ----------
+// Nombre con el que Banco guarda los datos en localStorage.
+// Para empezar de cero, en la consola: localStorage.removeItem("digibank")
+const CLAVE_ALMACENAMIENTO = "digibank";
+
 // =============================================================
 // Funciones de montos
 // =============================================================

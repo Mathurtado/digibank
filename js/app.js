@@ -5,7 +5,9 @@
 // =============================================================
 
 // Única instancia del banco. Es la única variable global del proyecto.
+// Al arrancar recupera los clientes guardados en el navegador (localStorage).
 const banco = new Banco();
+banco.cargar();
 
 // true mientras desarrollamos: crea un cliente de prueba con sesión
 // iniciada y abre el panel directamente. PONER EN false antes de la entrega.

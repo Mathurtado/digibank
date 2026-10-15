@@ -168,6 +168,23 @@ class TarjetaCredito extends Cuenta {
       .sort((a, b) => b.fecha - a.fecha);
   }
 
+  // ---------- Almacenamiento ----------
+
+  // POLIMORFISMO: agrega a los datos de Cuenta el cupo y las compras.
+  aDatos() {
+    return {
+      ...super.aDatos(),
+      cupo: this.cupo,
+      compras: this.#compras.map((compra) => ({ ...compra, fecha: compra.fecha.toISOString() })),
+    };
+  }
+
+  // Devuelve a una tarjeta recién creada las compras guardadas.
+  // Solo la usa Banco al cargar los datos.
+  static restaurarCompras(tarjeta, compras) {
+    tarjeta.#compras = compras.map((compra) => ({ ...compra, fecha: new Date(compra.fecha) }));
+  }
+
   // Privado: "1 cuota" o "12 cuotas"
   #textoCuotas(cuotas) {
     return cuotas === 1 ? "1 cuota" : cuotas + " cuotas";
