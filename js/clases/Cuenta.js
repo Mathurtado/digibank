@@ -90,6 +90,44 @@ class Cuenta {
     );
   }
 
+  /**
+   * Transfiere dinero a otra cuenta de depósito y registra ambos movimientos.
+   * Devuelve: crearRespuesta(tipo, mensaje, { saldoOrigen, saldoDestino })
+   */
+  transferirA(destino, monto) {
+    const error = this.#validarMonto(monto);
+    if (error !== null) {
+      return error;
+    }
+    if (!(destino instanceof Cuenta) || this.tipo === TIPO_TARJETA || destino.tipo === TIPO_TARJETA) {
+      return crearRespuesta("error", "Las transferencias solo están disponibles entre cuentas de ahorros y corriente.");
+    }
+    if (destino === this) {
+      return crearRespuesta("error", "Selecciona una cuenta distinta a la cuenta de origen.");
+    }
+
+    const limite = this.limiteRetiro();
+    if (monto > limite) {
+      return crearRespuesta(
+        "error",
+        "Saldo insuficiente. Puedes transferir hasta " + formatearMoneda(Math.max(limite, 0)) + "."
+      );
+    }
+
+    this.#saldo -= monto;
+    destino.#saldo += monto;
+
+    const fecha = new Date();
+    this.#registrarMovimiento("transferencia enviada", monto, { cuentaDestino: destino.numero }, fecha);
+    destino.#registrarMovimiento("transferencia recibida", monto, { cuentaOrigen: this.numero }, fecha);
+
+    return crearRespuesta(
+      "exito",
+      "Transferencia exitosa por " + formatearMoneda(monto) + " a la cuenta Nº " + destino.numero + ".",
+      { saldoOrigen: this.#saldo, saldoDestino: destino.#saldo }
+    );
+  }
+
   // Método polimórfico: cuánto se puede retirar como máximo.
   // En la clase padre, el saldo disponible.
   limiteRetiro() {
@@ -157,9 +195,10 @@ class Cuenta {
   // Privado (#): solo consignar() y retirar() pueden llamarlo, después de
   // validar. Así nadie puede agregar un movimiento falso desde afuera.
   // Movimiento: { fecha, tipo, valor, saldoResultante }
-  #registrarMovimiento(tipo, valor) {
+  #registrarMovimiento(tipo, valor, datos = {}, fecha = new Date()) {
     this.#movimientos.push({
-      fecha: new Date(),
+      ...datos,
+      fecha: fecha,
       tipo: tipo,
       valor: valor,
       saldoResultante: this.#saldo, // el saldo ya actualizado

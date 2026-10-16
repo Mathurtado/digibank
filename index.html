@@ -236,6 +236,7 @@
           <button type="button" data-ver="vista-saldo">Saldo</button>
           <button type="button" data-ver="vista-consignar">Consignar</button>
           <button type="button" data-ver="vista-retirar">Retirar</button>
+          <button type="button" data-ver="vista-transferir">Transferir</button>
           <button type="button" data-ver="vista-movimientos">Movimientos</button>
           <button type="button" data-ver="vista-tarjeta">Tarjeta</button>
           <button type="button" data-ver="vista-perfil">Perfil</button>
@@ -270,6 +271,23 @@
               <input type="text" id="retirar-monto" class="campo-monto" inputmode="numeric" autocomplete="off" placeholder="0">
             </div>
             <button type="submit" class="boton-principal">Retirar</button>
+          </form>
+        </div>
+
+        <!-- Transferir entre cuentas bancarias -->
+        <div id="vista-transferir" class="vista oculto">
+          <h3>Transferir dinero</h3>
+          <form id="transferir-formulario" class="formulario formulario-operacion" novalidate>
+            <div class="campo">
+              <label for="transferir-numero">Número de cuenta destino</label>
+              <input type="text" id="transferir-numero" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="6 dígitos">
+              <p class="ayuda">Solo puedes transferir entre cuentas de ahorros y corriente.</p>
+            </div>
+            <div class="campo">
+              <label for="transferir-monto">Monto</label>
+              <input type="text" id="transferir-monto" class="campo-monto" inputmode="numeric" autocomplete="off" placeholder="0">
+            </div>
+            <button type="submit" class="boton-principal">Transferir</button>
           </form>
         </div>
 
