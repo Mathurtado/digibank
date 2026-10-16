@@ -821,6 +821,25 @@ input.campo-monto {
 
 /* Perfil: reutiliza .tarjeta-resumen, con letra más pequeña
    y más espacio para el correo */
+.perfil-encabezado {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+}
+
+.perfil-encabezado h3 {
+  margin: 0;
+}
+
+.perfil-avatar {
+  width: 4rem;
+  height: 4rem;
+  flex: 0 0 auto;
+  border: 1px solid var(--linea);
+  border-radius: 50%;
+  background: var(--papel);
+}
+
 .perfil-datos {
   grid-template-columns: 1fr 1.2fr 1.6fr 1fr;
 }
