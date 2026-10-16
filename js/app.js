@@ -128,7 +128,17 @@ inicializarPerfil();       // interfaz/perfil.js
 
 if (MODO_PRUEBA) {
   banco.cargarDatosDePrueba();
+  const rendimiento = banco.acreditarRendimientosPendientes();
   entrarAlPanel();
+  if (rendimiento.tipo !== "exito") {
+    mostrarMensaje(rendimiento);
+  } else if (rendimiento.datos.rendimiento > 0) {
+    mostrarMensaje(crearRespuesta(
+      "exito",
+      "Se abonó rendimiento mensual de ahorros por " +
+        formatearMoneda(rendimiento.datos.rendimiento) + "."
+    ));
+  }
 } else {
   mostrarSeccion("seccion-inicio");
 }

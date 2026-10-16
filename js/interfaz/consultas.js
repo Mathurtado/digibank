@@ -43,6 +43,7 @@ function inicializarConsultas() {
     "retiro": "Retiro",
     "transferencia enviada": "Transferencia enviada",
     "transferencia recibida": "Transferencia recibida",
+    "rendimiento": "Rendimiento de ahorros",
     "compra": "Compra con tarjeta",
     "pago": "Pago de la tarjeta"
   };

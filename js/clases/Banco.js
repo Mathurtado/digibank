@@ -378,13 +378,46 @@ class Banco {
     return new TarjetaCredito(numero);
   }
 
+  // Acredita el rendimiento pendiente de las cuentas de ahorros del cliente.
+  acreditarRendimientosPendientes(fechaActual = new Date()) {
+    if (this.clienteActivo === null) {
+      return crearRespuesta("error", "Inicia sesión para calcular el rendimiento de tus ahorros.");
+    }
+
+    let rendimientoTotal = 0;
+    let huboProcesamiento = false;
+    for (const cuenta of this.clienteActivo.cuentas) {
+      if (!(cuenta instanceof CuentaAhorros)) {
+        continue;
+      }
+
+      const respuesta = cuenta.procesarRendimientoMensual(fechaActual);
+      if (respuesta.tipo !== "exito") {
+        if (huboProcesamiento) {
+          this.guardar();
+        }
+        return respuesta;
+      }
+      huboProcesamiento = huboProcesamiento || respuesta.datos.procesado;
+      rendimientoTotal += respuesta.datos.rendimiento;
+    }
+
+    if (huboProcesamiento) {
+      this.guardar();
+    }
+    return crearRespuesta("exito", "", {
+      procesado: huboProcesamiento,
+      rendimiento: rendimientoTotal,
+    });
+  }
+
   // ---------- Almacenamiento (localStorage) ----------
 
   // Guarda todos los clientes y sus cuentas en el navegador.
   // La sesión (clienteActivo) NO se guarda: al recargar hay que volver a entrar.
   // Se llama después de cada cambio: registro, intentos de login, cambio de
   // contraseña en el perfil y, desde la interfaz, después de cada
-  // consignación, retiro, compra o pago exitoso.
+  // consignación, retiro, rendimiento, compra o pago exitoso.
   guardar() {
     const datos = {
       siguienteNumeroCuenta: this.#siguienteNumeroCuenta,
@@ -441,6 +474,9 @@ class Banco {
       TarjetaCredito.restaurarCompras(cuenta, datos.compras);
     }
     Cuenta.restaurar(cuenta, datos);
+    if (datos.tipo === "ahorros") {
+      CuentaAhorros.restaurarRendimiento(cuenta, datos);
+    }
     return cuenta;
   }
 

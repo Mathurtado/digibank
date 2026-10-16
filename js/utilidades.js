@@ -20,7 +20,9 @@ const MAX_CARACTERES_USUARIO = 15;
 const DIGITOS_CELULAR = 10;
 
 // ---------- Reglas de cuentas ----------
-const TASA_INTERES_AHORROS = 0.015; // 1,5 %. Cómo se aplica: PENDIENTE (profesor)
+// Rendimiento mensual de ahorros: se prorratea entre los días del mes
+// usando el saldo al cierre de cada día y se abona al primer acceso posterior.
+const TASA_INTERES_AHORROS = 0.015;
 const PORCENTAJE_SOBREGIRO = 0.2;   // 20 % sobre el saldo en cuenta corriente
 
 // ---------- Tarjeta de crédito ----------

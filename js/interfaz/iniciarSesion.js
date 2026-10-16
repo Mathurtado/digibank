@@ -16,10 +16,21 @@ function inicializarLogin() {
     const respuesta = banco.iniciarSesion(usuario, contrasena);
 
     if (respuesta.tipo === "exito") {
+      const rendimiento = banco.acreditarRendimientosPendientes();
       formulario.reset();
       textoIntentos.classList.add("oculto");
       entrarAlPanel();
-      mostrarMensaje(respuesta);
+      if (rendimiento.tipo !== "exito") {
+        mostrarMensaje(rendimiento);
+      } else if (rendimiento.datos.rendimiento > 0) {
+        mostrarMensaje(crearRespuesta(
+          "exito",
+          respuesta.mensaje + " Se abonó rendimiento mensual de ahorros por " +
+            formatearMoneda(rendimiento.datos.rendimiento) + "."
+        ));
+      } else {
+        mostrarMensaje(respuesta);
+      }
       return;
     }
 

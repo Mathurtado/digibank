@@ -49,6 +49,24 @@ class Cuenta {
     );
   }
 
+  // Abona el rendimiento ya calculado por la cuenta de ahorros y lo registra.
+  acreditarRendimiento(monto) {
+    if (this.tipo !== "ahorros") {
+      return crearRespuesta("error", "El rendimiento solo se puede abonar a una cuenta de ahorros.");
+    }
+    if (!Number.isInteger(monto) || monto <= 0) {
+      return crearRespuesta("error", "El rendimiento a abonar debe ser un monto entero mayor que $0.");
+    }
+
+    this.#saldo += monto;
+    this.#registrarMovimiento("rendimiento", monto);
+    return crearRespuesta(
+      "exito",
+      "Rendimiento de ahorros abonado: " + formatearMoneda(monto) + ". Nuevo saldo: " + formatearMoneda(this.#saldo) + ".",
+      { saldo: this.#saldo, rendimiento: monto }
+    );
+  }
+
   /**
    * Resta dinero de la cuenta.
    * Devuelve: crearRespuesta(tipo, mensaje, { saldo })
@@ -64,9 +82,7 @@ class Cuenta {
       return error;
     }
 
-    // Paso 2: calcular el interés (depende del tipo de cuenta).
-    // PENDIENTE (profesor): si el 1,5 % es un rendimiento y no un cobro,
-    // aquí cambia el signo. Hoy calcularInteresRetiro() devuelve 0.
+    // Paso 2: calcular cualquier cargo asociado al retiro según el tipo de cuenta.
     const interes = this.calcularInteresRetiro(monto);
     const totalADescontar = monto + interes;
 
