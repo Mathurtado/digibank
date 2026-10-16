@@ -52,4 +52,24 @@ function inicializarOperaciones() {
       banco.guardar();
     }
   });
+
+  document.getElementById("transferir-formulario").addEventListener("submit", (evento) => {
+    evento.preventDefault();
+
+    const cuenta = obtenerCuentaSeleccionada();
+    if (cuenta === null) {
+      mostrarMensaje(crearRespuesta("error", "Inicia sesión para hacer transferencias."));
+      return;
+    }
+
+    const campoNumero = document.getElementById("transferir-numero");
+    const campoMonto = document.getElementById("transferir-monto");
+    const respuesta = banco.transferir(cuenta, campoNumero.value, convertirMonto(campoMonto.value));
+
+    mostrarMensaje(respuesta);
+    if (respuesta.tipo === "exito") {
+      campoNumero.value = "";
+      campoMonto.value = "";
+    }
+  });
 }

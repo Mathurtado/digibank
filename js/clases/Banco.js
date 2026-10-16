@@ -378,6 +378,38 @@ class Banco {
     return new TarjetaCredito(numero);
   }
 
+  // Transfiere desde una cuenta del cliente activo a cualquier cuenta bancaria.
+  transferir(origen, numeroDestino, monto) {
+    if (this.clienteActivo === null) {
+      return crearRespuesta("error", "Inicia sesión para hacer transferencias.");
+    }
+    if (!this.clienteActivo.cuentas.includes(origen)) {
+      return crearRespuesta("error", "La cuenta de origen no pertenece al cliente activo.");
+    }
+
+    const numeroBuscado = String(numeroDestino || "").trim();
+    if (!/^\d{6}$/.test(numeroBuscado)) {
+      return crearRespuesta("error", "Ingresa un número de cuenta válido de 6 dígitos.");
+    }
+
+    let destino = null;
+    for (const cliente of this.#clientes) {
+      destino = cliente.cuentas.find((cuenta) => cuenta.numero === numeroBuscado) || null;
+      if (destino !== null) {
+        break;
+      }
+    }
+    if (destino === null) {
+      return crearRespuesta("error", "No encontramos una cuenta con ese número.");
+    }
+
+    const respuesta = origen.transferirA(destino, monto);
+    if (respuesta.tipo === "exito") {
+      this.guardar();
+    }
+    return respuesta;
+  }
+
   // ---------- Almacenamiento (localStorage) ----------
 
   // Guarda todos los clientes y sus cuentas en el navegador.
