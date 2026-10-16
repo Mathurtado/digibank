@@ -207,26 +207,10 @@ class Banco {
       return crearRespuesta("error", "Ese nombre de usuario ya está en uso. Elige otro.");
     }
 
-    // ----- Contraseña -----
-    if (d.contrasena === "") {
-      return crearRespuesta("error", "Ingresa una contraseña.");
-    }
-    if (/\s/.test(d.contrasena)) {
-      return crearRespuesta("error", "La contraseña no puede tener espacios.");
-    }
-    if (d.contrasena.length < MIN_CARACTERES_CONTRASENA) {
-      return crearRespuesta(
-        "error",
-        "La contraseña debe tener al menos " + MIN_CARACTERES_CONTRASENA + " caracteres."
-      );
-    }
-    if (!/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(d.contrasena) || !/\d/.test(d.contrasena)) {
-      return crearRespuesta("error", "La contraseña debe tener al menos una letra y un número.");
-    }
-
-    // ----- Confirmación -----
-    if (d.confirmacion !== d.contrasena) {
-      return crearRespuesta("error", "Las contraseñas no coinciden.");
+    // ----- Contraseña y confirmación -----
+    const errorContrasena = this.#validarContrasena(d.contrasena, d.confirmacion);
+    if (errorContrasena !== null) {
+      return errorContrasena;
     }
 
     // ----- Tipo de cuenta -----
@@ -245,6 +229,65 @@ class Banco {
     }
 
     return null; // todo está bien
+  }
+
+  // ---------- Regla de contraseña: la usan el registro y el perfil ----------
+
+  // Revisa una contraseña nueva y su confirmación.
+  // Devuelve una respuesta de error, o null si sirve.
+  #validarContrasena(contrasena, confirmacion) {
+    if (contrasena === "") {
+      return crearRespuesta("error", "Ingresa una contraseña.");
+    }
+    if (/\s/.test(contrasena)) {
+      return crearRespuesta("error", "La contraseña no puede tener espacios.");
+    }
+    if (contrasena.length < MIN_CARACTERES_CONTRASENA) {
+      return crearRespuesta(
+        "error",
+        "La contraseña debe tener al menos " + MIN_CARACTERES_CONTRASENA + " caracteres."
+      );
+    }
+    if (!/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(contrasena) || !/\d/.test(contrasena)) {
+      return crearRespuesta("error", "La contraseña debe tener al menos una letra y un número.");
+    }
+    if (confirmacion !== contrasena) {
+      return crearRespuesta("error", "Las contraseñas no coinciden.");
+    }
+    return null;
+  }
+
+  // ---------- Perfil: cambiar contraseña ----------
+
+  /**
+   * Cambia la contraseña del cliente que inició sesión.
+   * Pide la contraseña actual para confirmar que es el dueño de la cuenta.
+   * Devuelve: crearRespuesta(...)
+   */
+  cambiarContrasena(contrasenaActual, nueva, confirmacion) {
+    // Paso 1: tiene que haber una sesión abierta
+    const cliente = this.clienteActivo;
+    if (cliente === null) {
+      return crearRespuesta("error", "Inicia sesión para cambiar tus datos.");
+    }
+
+    // Paso 2: confirmar que quien escribe es el dueño de la cuenta
+    if (!cliente.verificarContrasena(String(contrasenaActual || ""))) {
+      return crearRespuesta("error", "La contraseña actual es incorrecta.");
+    }
+
+    // Paso 3: mismas reglas que en el registro.
+    // La contraseña NO se limpia: un espacio es un error que hay que avisar.
+    const textoNueva = String(nueva || "");
+    const error = this.#validarContrasena(textoNueva, String(confirmacion || ""));
+    if (error !== null) {
+      return error;
+    }
+
+    // Paso 4: todo bien, se guarda la contraseña nueva
+    cliente.cambiarContrasena(textoNueva);
+    this.guardar(); // para que el cambio siga aunque se recargue la página
+    return crearRespuesta("exito", "Tu contraseña se cambió correctamente.");
   }
 
   // ---------- Inicio de sesión (Mateo, rama 6-iniciar-sesion) ----------
@@ -339,8 +382,9 @@ class Banco {
 
   // Guarda todos los clientes y sus cuentas en el navegador.
   // La sesión (clienteActivo) NO se guarda: al recargar hay que volver a entrar.
-  // Se llama después de cada cambio: registro, intentos de login y, desde la
-  // interfaz, después de cada consignación, retiro, compra o pago exitoso.
+  // Se llama después de cada cambio: registro, intentos de login, cambio de
+  // contraseña en el perfil y, desde la interfaz, después de cada
+  // consignación, retiro, compra o pago exitoso.
   guardar() {
     const datos = {
       siguienteNumeroCuenta: this.#siguienteNumeroCuenta,

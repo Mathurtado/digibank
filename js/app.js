@@ -31,6 +31,9 @@ function mostrarVista(idVista) {
   if (idVista === "vista-saldo") {
     actualizarSaldo();
   }
+  if (idVista === "vista-perfil") {
+    actualizarPerfil(); // interfaz/perfil.js
+  }
   ocultarMensaje();
 }
 
@@ -121,6 +124,7 @@ inicializarLogin();        // interfaz/iniciarSesion.js
 inicializarOperaciones();  // interfaz/operaciones.js
 inicializarConsultas();    // interfaz/consultas.js
 inicializarTarjeta();      // interfaz/tarjeta.js
+inicializarPerfil();       // interfaz/perfil.js
 
 if (MODO_PRUEBA) {
   banco.cargarDatosDePrueba();

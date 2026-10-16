@@ -27,6 +27,11 @@ class Cliente {
     return this.#contrasena === texto;
   }
 
+  // Reemplaza la contraseña. Banco ya revisó que la nueva cumpla las reglas.
+  cambiarContrasena(nueva) {
+    this.#contrasena = nueva;
+  }
+
   // true si el bloqueo sigue vigente.
   // Si el bloqueo ya venció, lo quita y reinicia el contador.
   estaBloqueado() {

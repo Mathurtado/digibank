@@ -679,7 +679,8 @@ input.campo-monto {
 .panel:has(#vista-consignar:not(.oculto)) [data-ver="vista-consignar"],
 .panel:has(#vista-retirar:not(.oculto)) [data-ver="vista-retirar"],
 .panel:has(#vista-movimientos:not(.oculto)) [data-ver="vista-movimientos"],
-.panel:has(#vista-tarjeta:not(.oculto)) [data-ver="vista-tarjeta"] {
+.panel:has(#vista-tarjeta:not(.oculto)) [data-ver="vista-tarjeta"],
+.panel:has(#vista-perfil:not(.oculto)) [data-ver="vista-perfil"] {
   color: var(--verde);
   border-bottom-color: var(--laton);
 }
@@ -816,6 +817,18 @@ input.campo-monto {
   font-family: var(--fuente-titulo);
   font-size: var(--t-grande);
   color: var(--tinta);
+}
+
+/* Perfil: reutiliza .tarjeta-resumen, con letra más pequeña
+   y más espacio para el correo */
+.perfil-datos {
+  grid-template-columns: 1fr 1.2fr 1.6fr 1fr;
+}
+
+.perfil-datos dd {
+  font-family: var(--fuente-texto);
+  font-size: var(--t-base);
+  overflow-wrap: anywhere;
 }
 
 .tarjeta-simulacion {
