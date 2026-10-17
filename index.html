@@ -384,9 +384,15 @@
 
           <h4>Cambiar contraseña</h4>
           <form id="perfil-contrasena-formulario" class="formulario" novalidate>
-            <div class="campo">
-              <label for="perfil-contrasena-actual">Contraseña actual</label>
-              <input type="password" id="perfil-contrasena-actual" autocomplete="current-password">
+            <div class="formulario-fila">
+              <div class="campo">
+                <label for="perfil-contrasena-usuario">Nombre de usuario</label>
+                <input type="text" id="perfil-contrasena-usuario" autocomplete="username">
+              </div>
+              <div class="campo">
+                <label for="perfil-contrasena-actual">Contraseña actual</label>
+                <input type="password" id="perfil-contrasena-actual" autocomplete="current-password">
+              </div>
             </div>
             <div class="formulario-fila">
               <div class="campo">
@@ -398,7 +404,7 @@
                 <input type="password" id="perfil-contrasena-confirmacion" autocomplete="new-password">
               </div>
             </div>
-            <p class="ayuda">Mínimo 6 caracteres, con al menos una letra y un número.</p>
+            <p class="ayuda">Mínimo 6 caracteres, con al menos una letra y un número, distinta de la actual. Después de tres intentos fallidos la cuenta se bloquea y se cierra la sesión.</p>
             <button type="submit" class="boton-principal">Cambiar contraseña</button>
           </form>
         </div>

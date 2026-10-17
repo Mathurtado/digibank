@@ -678,6 +678,7 @@ input.campo-monto {
 .panel:has(#vista-saldo:not(.oculto)) [data-ver="vista-saldo"],
 .panel:has(#vista-consignar:not(.oculto)) [data-ver="vista-consignar"],
 .panel:has(#vista-retirar:not(.oculto)) [data-ver="vista-retirar"],
+.panel:has(#vista-transferir:not(.oculto)) [data-ver="vista-transferir"],
 .panel:has(#vista-movimientos:not(.oculto)) [data-ver="vista-movimientos"],
 .panel:has(#vista-tarjeta:not(.oculto)) [data-ver="vista-tarjeta"],
 .panel:has(#vista-perfil:not(.oculto)) [data-ver="vista-perfil"] {

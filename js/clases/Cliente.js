@@ -28,8 +28,14 @@ class Cliente {
   }
 
   // Reemplaza la contraseña. Banco ya revisó que la nueva cumpla las reglas.
-  cambiarContrasena(nueva) {
+  // Pide la actual: así nadie puede cambiarla desde afuera (por ejemplo,
+  // desde la consola) sin conocerla. Devuelve true si se cambió.
+  cambiarContrasena(actual, nueva) {
+    if (!this.verificarContrasena(actual)) {
+      return false;
+    }
     this.#contrasena = nueva;
+    return true;
   }
 
   // true si el bloqueo sigue vigente.

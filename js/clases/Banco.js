@@ -261,31 +261,67 @@ class Banco {
 
   /**
    * Cambia la contraseña del cliente que inició sesión.
-   * Pide la contraseña actual para confirmar que es el dueño de la cuenta.
-   * Devuelve: crearRespuesta(...)
+   * Flujo del enunciado: usuario -> clave actual -> clave nueva -> confirmación.
+   * Los fallos de usuario o clave actual cuentan como intentos fallidos,
+   * igual que en el inicio de sesión: al tercero se bloquea la cuenta y
+   * se cierra la sesión.
+   * Devuelve: crearRespuesta(tipo, mensaje, datos)
+   *   datos = { intentosRestantes } tras un fallo, o { sesionCerrada: true }
+   *   cuando el fallo bloqueó la cuenta.
    */
-  cambiarContrasena(contrasenaActual, nueva, confirmacion) {
+  cambiarContrasena(usuario, contrasenaActual, nueva, confirmacion) {
     // Paso 1: tiene que haber una sesión abierta
     const cliente = this.clienteActivo;
     if (cliente === null) {
       return crearRespuesta("error", "Inicia sesión para cambiar tus datos.");
     }
 
-    // Paso 2: confirmar que quien escribe es el dueño de la cuenta
-    if (!cliente.verificarContrasena(String(contrasenaActual || ""))) {
-      return crearRespuesta("error", "La contraseña actual es incorrecta.");
+    const textoUsuario = String(usuario || "").trim().toLowerCase();
+    const textoActual = String(contrasenaActual || "");
+
+    // Paso 2: campos vacíos. No cuenta como intento fallido.
+    if (textoUsuario === "" || textoActual === "") {
+      return crearRespuesta("error", "Ingresa tu usuario y tu contraseña actual.");
     }
 
-    // Paso 3: mismas reglas que en el registro.
+    // Paso 3: confirmar que quien escribe es el dueño de la cuenta.
+    // El usuario debe ser el de la sesión abierta.
+    if (textoUsuario !== cliente.usuario || !cliente.verificarContrasena(textoActual)) {
+      cliente.registrarIntentoFallido();
+      this.guardar();
+
+      if (cliente.estaBloqueado()) {
+        this.cerrarSesion();
+        return crearRespuesta(
+          "error",
+          "Demasiados intentos fallidos. Tu cuenta quedó bloqueada por " + MINUTOS_BLOQUEO +
+            " minutos y se cerró la sesión.",
+          { sesionCerrada: true }
+        );
+      }
+
+      const restantes = MAX_INTENTOS - cliente.intentosFallidos;
+      return crearRespuesta(
+        "error",
+        "Usuario o contraseña actual incorrectos. Intentos restantes: " + restantes + ".",
+        { intentosRestantes: restantes }
+      );
+    }
+
+    // Paso 4: mismas reglas que en el registro.
     // La contraseña NO se limpia: un espacio es un error que hay que avisar.
     const textoNueva = String(nueva || "");
     const error = this.#validarContrasena(textoNueva, String(confirmacion || ""));
     if (error !== null) {
       return error;
     }
+    if (textoNueva === textoActual) {
+      return crearRespuesta("error", "La contraseña nueva debe ser distinta de la actual.");
+    }
 
-    // Paso 4: todo bien, se guarda la contraseña nueva
-    cliente.cambiarContrasena(textoNueva);
+    // Paso 5: todo bien. Se guarda la contraseña nueva y se reinician los intentos.
+    cliente.cambiarContrasena(textoActual, textoNueva);
+    cliente.reiniciarIntentos();
     this.guardar(); // para que el cambio siga aunque se recargue la página
     return crearRespuesta("exito", "Tu contraseña se cambió correctamente.");
   }
@@ -396,10 +432,23 @@ class Banco {
       {
         numero: destino.datos.cuenta.numero,
         tipoCuenta: destino.datos.cuenta.tipo,
-        nombreCompleto: destino.datos.cliente.nombreCompleto,
+        // Por privacidad solo se muestra el nombre y la inicial del apellido
+        // ("Ana R."). Si la cuenta es del mismo cliente, se muestra completo.
+        nombreDestinatario: destino.datos.cliente === this.clienteActivo
+          ? destino.datos.cliente.nombreCompleto
+          : this.#nombreParcial(destino.datos.cliente.nombreCompleto),
         esMismoUsuario: destino.datos.cliente === this.clienteActivo,
       }
     );
+  }
+
+  // "Ana María Ruiz Gómez" -> "Ana R.": primer nombre e inicial del apellido.
+  // Se toma como apellido la penúltima palabra si hay cuatro o más
+  // (dos nombres y dos apellidos); si no, la segunda.
+  #nombreParcial(nombreCompleto) {
+    const partes = nombreCompleto.split(" ");
+    const apellido = partes.length >= 4 ? partes[partes.length - 2] : partes[1];
+    return partes[0] + " " + apellido.charAt(0).toUpperCase() + ".";
   }
 
   // Transfiere desde una cuenta del cliente activo a cualquier cuenta bancaria.
