@@ -72,6 +72,13 @@ function inicializarOperaciones() {
       return;
     }
 
+    // Si es la misma cuenta, no tiene sentido pedir confirmación: se
+    // intenta de una vez y la clase Cuenta responde con el error.
+    if (destino.datos.numero === cuenta.numero) {
+      mostrarMensaje(banco.transferir(cuenta, campoNumero.value, convertirMonto(campoMonto.value)));
+      return;
+    }
+
     const tipoCuenta = nombreProducto(destino.datos.tipoCuenta);
     const confirmacion = window.confirm(
       "Vas a transferir dinero a " + destino.datos.nombreDestinatario +
