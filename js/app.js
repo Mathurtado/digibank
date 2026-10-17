@@ -9,10 +9,6 @@
 const banco = new Banco();
 banco.cargar();
 
-// true mientras desarrollamos: crea un cliente de prueba con sesión
-// iniciada y abre el panel directamente. PONER EN false antes de la entrega.
-const MODO_PRUEBA = true;
-
 // ---------- Navegación ----------
 
 // Muestra una sección (inicio, registro, login, panel) y oculta las demás.
@@ -127,9 +123,5 @@ inicializarTarjeta();      // interfaz/tarjeta.js
 inicializarPerfil();       // interfaz/perfil.js
 inicializarAdministracion(); // interfaz/administracion.js
 
-if (MODO_PRUEBA) {
-  banco.cargarDatosDePrueba();
-  entrarAlPanel();
-} else {
-  mostrarSeccion("seccion-inicio");
-}
+// La aplicación siempre empieza en la página de inicio, sin sesión abierta.
+mostrarSeccion("seccion-inicio");
