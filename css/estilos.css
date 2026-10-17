@@ -915,6 +915,16 @@ input.campo-monto {
 
 /* ---------- 10b. Administración de clientes (CRUD) ---------- */
 
+/* La tabla necesita más ancho que el panel del cliente */
+#seccion-admin .panel {
+  max-width: 72rem;
+}
+
+/* En computador los datos de cada celda no se parten en dos líneas */
+.admin-tabla td > div > span {
+  white-space: nowrap;
+}
+
 .admin-acciones {
   display: flex;
   flex-wrap: wrap;
@@ -1011,8 +1021,8 @@ input.campo-monto {
 }
 
 .admin-botones {
+  min-width: 11rem;
   text-align: right;
-  white-space: nowrap;
 }
 
 .boton-tabla {
@@ -1185,6 +1195,10 @@ input.campo-monto {
   .admin-tabla td::before {
     content: attr(data-etiqueta);
     color: var(--pizarra);
+  }
+
+  .admin-tabla td > div > span {
+    white-space: normal;
   }
 
   .admin-tabla td.admin-botones {
