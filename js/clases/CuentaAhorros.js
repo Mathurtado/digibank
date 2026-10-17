@@ -4,8 +4,8 @@
 // =============================================================
 
 class CuentaAhorros extends Cuenta {
-  constructor(numero) {
-    super(numero, "ahorros");
+  constructor(numero, datosGuardados = null) {
+    super(numero, "ahorros", datosGuardados);
   }
 
   // POLIMORFISMO: redefine el interés que aplica la clase padre.

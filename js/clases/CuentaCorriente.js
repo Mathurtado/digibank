@@ -4,8 +4,8 @@
 // =============================================================
 
 class CuentaCorriente extends Cuenta {
-  constructor(numero) {
-    super(numero, "corriente");
+  constructor(numero, datosGuardados = null) {
+    super(numero, "corriente", datosGuardados);
   }
 
   // POLIMORFISMO: redefine el límite de retiro de la clase padre.

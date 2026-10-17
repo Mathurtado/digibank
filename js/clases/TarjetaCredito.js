@@ -15,12 +15,22 @@
 // =============================================================
 
 class TarjetaCredito extends Cuenta {
+  #cupo;    // número entero
   #compras; // [{ fecha, descripcion, monto, cuotas, tasaMensual, cuotaMensual, totalAPagar }]
 
-  constructor(numero, cupo = CUPO_TARJETA_INICIAL) {
-    super(numero, TIPO_TARJETA);
-    this.cupo = cupo; // número entero
-    this.#compras = [];
+  // datosGuardados: solo al cargar desde localStorage (saldo, movimientos y compras)
+  constructor(numero, cupo = CUPO_TARJETA_INICIAL, datosGuardados = null) {
+    super(numero, TIPO_TARJETA, datosGuardados);
+    this.#cupo = Number.isInteger(cupo) && cupo > 0 ? cupo : CUPO_TARJETA_INICIAL;
+    const compras = datosGuardados !== null && Array.isArray(datosGuardados.compras)
+      ? datosGuardados.compras
+      : [];
+    this.#compras = compras.map((compra) => ({ ...compra, fecha: new Date(compra.fecha) }));
+  }
+
+  // Solo lectura
+  get cupo() {
+    return this.#cupo;
   }
 
   // Lo que se debe hoy (número positivo o 0)
@@ -32,7 +42,7 @@ class TarjetaCredito extends Cuenta {
 
   // Lo máximo que se puede gastar: el cupo menos lo que ya se debe.
   limiteRetiro() {
-    return Math.max(this.cupo + this.saldo, 0);
+    return Math.max(this.#cupo + this.saldo, 0);
   }
 
   // La tarjeta no cobra interés al momento de la compra: se cobra en las cuotas.
@@ -174,15 +184,9 @@ class TarjetaCredito extends Cuenta {
   aDatos() {
     return {
       ...super.aDatos(),
-      cupo: this.cupo,
+      cupo: this.#cupo,
       compras: this.#compras.map((compra) => ({ ...compra, fecha: compra.fecha.toISOString() })),
     };
-  }
-
-  // Devuelve a una tarjeta recién creada las compras guardadas.
-  // Solo la usa Banco al cargar los datos.
-  static restaurarCompras(tarjeta, compras) {
-    tarjeta.#compras = compras.map((compra) => ({ ...compra, fecha: new Date(compra.fecha) }));
   }
 
   // Privado: "1 cuota" o "12 cuotas"

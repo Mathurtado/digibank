@@ -2,25 +2,53 @@
 // Cuenta.js — Clase padre de todos los productos bancarios.
 // Responsable: Juan.
 //
-// ENCAPSULAMIENTO: #saldo y #movimientos son privados. Solo esta
-// clase puede modificarlos. Las clases hijas NO pueden leer #saldo
-// (en JavaScript los campos privados no se heredan); usan el getter
-// "saldo" para leerlo y redefinen limiteRetiro() y
-// calcularInteresRetiro() para cambiar el comportamiento (POLIMORFISMO).
+// ENCAPSULAMIENTO: #numero, #tipo, #saldo y #movimientos son privados.
+// Solo esta clase puede modificarlos; desde afuera se leen con getters.
+// Las clases hijas tampoco pueden leer #saldo (en JavaScript los campos
+// privados no se heredan): usan el getter "saldo" y redefinen
+// limiteRetiro() y calcularInteresRetiro() para cambiar el
+// comportamiento (POLIMORFISMO).
 // =============================================================
 
 class Cuenta {
+  #numero;
+  #tipo;
   #saldo;
   #movimientos;
 
-  constructor(numero, tipo) {
-    this.numero = numero; // texto, lo asigna Banco
-    this.tipo = tipo;     // "ahorros", "corriente" o "credito"
+  /**
+   * numero: texto de 6 dígitos, lo asigna Banco.
+   * tipo: "ahorros", "corriente" o "credito".
+   * datosGuardados: solo al cargar desde localStorage ({ saldo, movimientos }).
+   *   Así el saldo guardado se recupera sin que exista un método público
+   *   que lo cambie en una cuenta que ya está en uso.
+   */
+  constructor(numero, tipo, datosGuardados = null) {
+    this.#numero = numero;
+    this.#tipo = tipo;
     this.#saldo = 0;
     this.#movimientos = [];
+    if (datosGuardados !== null) {
+      this.#saldo = Number.isInteger(datosGuardados.saldo) ? datosGuardados.saldo : 0;
+      const movimientos = Array.isArray(datosGuardados.movimientos) ? datosGuardados.movimientos : [];
+      this.#movimientos = movimientos.map((movimiento) => ({
+        ...movimiento,
+        fecha: new Date(movimiento.fecha), // se guardó como texto
+      }));
+    }
   }
 
-  // Solo lectura: no existe un setter, así nadie cambia el saldo desde afuera.
+  // ---------- Getters: solo lectura (no hay setters) ----------
+
+  get numero() {
+    return this.#numero;
+  }
+
+  get tipo() {
+    return this.#tipo;
+  }
+
+  // No existe un setter: nadie cambia el saldo desde afuera.
   get saldo() {
     return this.#saldo;
   }
@@ -170,8 +198,8 @@ class Cuenta {
   // Las fechas se guardan como texto y se convierten de nuevo al cargar.
   aDatos() {
     return {
-      numero: this.numero,
-      tipo: this.tipo,
+      numero: this.#numero,
+      tipo: this.#tipo,
       saldo: this.#saldo,
       movimientos: this.#movimientos.map((movimiento) => ({
         ...movimiento,
@@ -180,20 +208,8 @@ class Cuenta {
     };
   }
 
-  // Devuelve a una cuenta recién creada el saldo y los movimientos guardados.
-  // Es static y está dentro de Cuenta, por eso puede escribir #saldo sin
-  // que exista un setter público (el encapsulamiento se mantiene).
-  // Solo la usa Banco al cargar los datos.
-  static restaurar(cuenta, datos) {
-    cuenta.#saldo = datos.saldo;
-    cuenta.#movimientos = datos.movimientos.map((movimiento) => ({
-      ...movimiento,
-      fecha: new Date(movimiento.fecha),
-    }));
-  }
-
-  // Privado (#): solo consignar() y retirar() pueden llamarlo, después de
-  // validar. Así nadie puede agregar un movimiento falso desde afuera.
+  // Privado (#): solo consignar(), retirar() y transferirA() pueden
+  // llamarlo, después de validar. Así nadie puede agregar un movimiento falso desde afuera.
   // Movimiento: { fecha, tipo, valor, saldoResultante }
   #registrarMovimiento(tipo, valor, datos = {}, fecha = new Date()) {
     this.#movimientos.push({

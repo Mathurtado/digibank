@@ -6,11 +6,18 @@
 class Banco {
   #clientes;
   #siguienteNumeroCuenta;
+  #clienteActivo; // Cliente que inició sesión, o null
 
   constructor() {
     this.#clientes = [];
     this.#siguienteNumeroCuenta = 1;
-    this.clienteActivo = null; // Cliente que inició sesión, o null
+    this.#clienteActivo = null;
+  }
+
+  // Solo lectura: la sesión solo se abre con iniciarSesion() y se cierra
+  // con cerrarSesion(). Nadie puede "entrar" como otro cliente asignándolo.
+  get clienteActivo() {
+    return this.#clienteActivo;
   }
 
   // ---------- Registro (Mateo, rama 4-registrar-clientes) ----------
@@ -34,16 +41,14 @@ class Banco {
       return error;
     }
 
-    // Paso 3: crear el cliente con los datos ya limpios y validados
-    const cliente = new Cliente(limpios);
-
-    // Paso 4: crear las cuentas que eligió y, si la pidió, la tarjeta
-    limpios.tiposCuenta.forEach((tipo) => {
-      cliente.agregarCuenta(this.crearCuenta(tipo));
-    });
+    // Paso 3: crear las cuentas que eligió y, si la pidió, la tarjeta
+    const cuentas = limpios.tiposCuenta.map((tipo) => this.#crearCuenta(tipo));
     if (limpios.solicitaTarjeta) {
-      cliente.agregarCuenta(this.crearCuenta(TIPO_TARJETA));
+      cuentas.push(this.#crearCuenta(TIPO_TARJETA));
     }
+
+    // Paso 4: crear el cliente con los datos ya limpios y validados, y sus cuentas
+    const cliente = new Cliente(limpios, cuentas);
 
     // Paso 5: saldo inicial. Se consigna en ahorros si la eligió; si no, en
     // corriente. Se usa consignar() para que quede como primer movimiento.
@@ -373,7 +378,7 @@ class Banco {
     // Paso 5: todo bien. Se reinicia el contador y se abre la sesión.
     cliente.reiniciarIntentos();
     this.guardar();
-    this.clienteActivo = cliente;
+    this.#clienteActivo = cliente;
     return crearRespuesta("exito", "Bienvenido, " + cliente.nombreCompleto + ".", {
       intentosRestantes: MAX_INTENTOS,
     });
@@ -393,13 +398,14 @@ class Banco {
   }
 
   cerrarSesion() {
-    this.clienteActivo = null;
+    this.#clienteActivo = null;
   }
 
-  // ---------- Cuentas (listo en el esqueleto: lo usan todos) ----------
+  // ---------- Cuentas ----------
 
-  // Crea una CuentaAhorros, CuentaCorriente o TarjetaCredito con un número nuevo.
-  crearCuenta(tipo) {
+  // Privado: crea una CuentaAhorros, CuentaCorriente o TarjetaCredito con un
+  // número nuevo. Solo Banco crea cuentas, así los números nunca se repiten.
+  #crearCuenta(tipo) {
     if (!TIPOS_CUENTA.includes(tipo) && tipo !== TIPO_TARJETA) {
       return null;
     }
@@ -531,30 +537,23 @@ class Banco {
   }
 
   // Crea de nuevo un Cliente (con sus métodos) a partir de los datos guardados.
+  // El constructor de Cliente recupera también los intentos y el bloqueo.
   #reconstruirCliente(datos) {
-    const cliente = new Cliente(datos);
-    cliente.intentosFallidos = datos.intentosFallidos;
-    cliente.bloqueadoHasta = datos.bloqueadoHasta;
-    datos.cuentas.forEach((d) => {
-      cliente.agregarCuenta(this.#reconstruirCuenta(d));
-    });
-    return cliente;
+    const cuentas = datos.cuentas.map((d) => this.#reconstruirCuenta(d));
+    return new Cliente(datos, cuentas);
   }
 
-  // Crea la clase correcta según el tipo guardado y le devuelve su saldo,
-  // sus movimientos y, si es tarjeta, sus compras.
+  // Crea la clase correcta según el tipo guardado. Cada constructor recibe
+  // los datos guardados y recupera su saldo, sus movimientos y, si es
+  // tarjeta, su cupo y sus compras.
   #reconstruirCuenta(datos) {
-    let cuenta;
     if (datos.tipo === "ahorros") {
-      cuenta = new CuentaAhorros(datos.numero);
-    } else if (datos.tipo === "corriente") {
-      cuenta = new CuentaCorriente(datos.numero);
-    } else {
-      cuenta = new TarjetaCredito(datos.numero, datos.cupo);
-      TarjetaCredito.restaurarCompras(cuenta, datos.compras);
+      return new CuentaAhorros(datos.numero, datos);
     }
-    Cuenta.restaurar(cuenta, datos);
-    return cuenta;
+    if (datos.tipo === "corriente") {
+      return new CuentaCorriente(datos.numero, datos);
+    }
+    return new TarjetaCredito(datos.numero, datos.cupo, datos);
   }
 
   // ---------- Datos de prueba (BORRAR antes de la entrega final) ----------
@@ -566,10 +565,15 @@ class Banco {
   cargarDatosDePrueba() {
     const guardado = this.buscarPorUsuario("prueba");
     if (guardado !== null) {
-      this.clienteActivo = guardado;
+      this.#clienteActivo = guardado;
       return;
     }
 
+    const cuentas = [
+      this.#crearCuenta("ahorros"),
+      this.#crearCuenta("corriente"),
+      this.#crearCuenta(TIPO_TARJETA),
+    ];
     const cliente = new Cliente({
       tipoDocumento: "cedula",
       identificacion: "1000000000",
@@ -578,12 +582,9 @@ class Banco {
       correo: "prueba@miplata.com",
       usuario: "prueba",
       contrasena: "prueba123",
-    });
-    cliente.agregarCuenta(this.crearCuenta("ahorros"));
-    cliente.agregarCuenta(this.crearCuenta("corriente"));
-    cliente.agregarCuenta(this.crearCuenta(TIPO_TARJETA));
+    }, cuentas);
     this.#clientes.push(cliente);
     this.guardar();
-    this.clienteActivo = cliente;
+    this.#clienteActivo = cliente;
   }
 }
