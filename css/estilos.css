@@ -1208,3 +1208,8 @@ input.campo-monto {
     transition: none !important;
   }
 }
+
+/* Texto de ayuda suelto dentro de una vista (por ejemplo, en Retirar) */
+.vista > .ayuda {
+  margin-top: var(--e-4);
+}

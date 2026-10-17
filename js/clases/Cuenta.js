@@ -92,29 +92,38 @@ class Cuenta {
       return error;
     }
 
-    // Paso 2: calcular el interés (depende del tipo de cuenta).
-    // PENDIENTE (profesor): si el 1,5 % es un rendimiento y no un cobro,
-    // aquí cambia el signo. Hoy calcularInteresRetiro() devuelve 0.
+    // Paso 2: interés que se abona en el momento del retiro (depende del
+    // tipo de cuenta). En la clase padre es 0; CuentaAhorros lo redefine:
+    // 1,5 % del saldo, una vez al mes.
     const interes = this.calcularInteresRetiro(monto);
-    const totalADescontar = monto + interes;
 
-    // Paso 3: revisar el límite (depende del tipo de cuenta)
-    const limite = this.limiteRetiro();
-    if (totalADescontar > limite) {
+    // Paso 3: revisar el límite (depende del tipo de cuenta).
+    // El interés que se va a abonar también cuenta como dinero disponible.
+    const limite = this.limiteRetiro() + interes;
+    if (monto > limite) {
       return crearRespuesta(
         "error",
         "Saldo insuficiente. Puedes retirar hasta " + formatearMoneda(Math.max(limite, 0)) + "."
       );
     }
 
-    // Paso 4: descontar y registrar (solo si todo salió bien)
-    this.#saldo = this.#saldo - totalADescontar;
-    this.#registrarMovimiento(this.tipoMovimientoRetiro(), totalADescontar);
+    // Paso 4: solo si todo salió bien: primero se abona el interés y
+    // después se descuenta el retiro. Cada uno queda como un movimiento.
+    if (interes > 0) {
+      this.#saldo = this.#saldo + interes;
+      this.#registrarMovimiento("interes", interes);
+    }
+    this.#saldo = this.#saldo - monto;
+    this.#registrarMovimiento(this.tipoMovimientoRetiro(), monto);
 
+    const textoInteres = interes > 0
+      ? " Se abonó el interés mensual de " + textoPorcentaje(TASA_INTERES_AHORROS) + ": " + formatearMoneda(interes) + "."
+      : "";
     return crearRespuesta(
       "exito",
-      "Retiro exitoso por " + formatearMoneda(monto) + ". Nuevo saldo: " + formatearMoneda(this.#saldo) + ".",
-      { saldo: this.#saldo }
+      "Retiro exitoso por " + formatearMoneda(monto) + "." + textoInteres +
+        " Nuevo saldo: " + formatearMoneda(this.#saldo) + ".",
+      { saldo: this.#saldo, interes: interes }
     );
   }
 
@@ -173,8 +182,8 @@ class Cuenta {
     return "retiro";
   }
 
-  // Método polimórfico: interés que se aplica al retirar.
-  // En la clase padre, ninguno.
+  // Método polimórfico: interés que se ABONA en el momento del retiro.
+  // En la clase padre, ninguno. CuentaAhorros lo redefine.
   calcularInteresRetiro(monto) {
     return 0;
   }

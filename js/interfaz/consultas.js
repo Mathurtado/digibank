@@ -41,6 +41,7 @@ function inicializarConsultas() {
   const NOMBRES_TIPO = {
     "consignacion": "Consignación",
     "retiro": "Retiro",
+    "interes": "Interés de ahorros (1,5 %)",
     "transferencia enviada": "Transferencia enviada",
     "transferencia recibida": "Transferencia recibida",
     "compra": "Compra con tarjeta",
