@@ -25,7 +25,8 @@ const MAX_CARACTERES_USUARIO = 15;
 const DIGITOS_CELULAR = 10;
 
 // ---------- Reglas de cuentas ----------
-const TASA_INTERES_AHORROS = 0.015; // 1,5 %. Cómo se aplica: PENDIENTE (profesor)
+// 1,5 % mensual: se abona en el primer retiro de cada mes (CuentaAhorros)
+const TASA_INTERES_AHORROS = 0.015;
 const PORCENTAJE_SOBREGIRO = 0.2;   // 20 % sobre el saldo en cuenta corriente
 
 // ---------- Tarjeta de crédito ----------
@@ -94,6 +95,14 @@ function convertirMonto(texto) {
 function formatearMoneda(numero) {
   const signo = numero < 0 ? "-" : "";
   return signo + "$" + Math.abs(numero).toLocaleString("es-CO");
+}
+
+/**
+ * Muestra una tasa como porcentaje.
+ * textoPorcentaje(0.015) -> "1,5 %"
+ */
+function textoPorcentaje(tasa) {
+  return String(Math.round(tasa * 1000) / 10).replace(".", ",") + " %";
 }
 
 /**
