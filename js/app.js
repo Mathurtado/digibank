@@ -125,6 +125,7 @@ inicializarOperaciones();  // interfaz/operaciones.js
 inicializarConsultas();    // interfaz/consultas.js
 inicializarTarjeta();      // interfaz/tarjeta.js
 inicializarPerfil();       // interfaz/perfil.js
+inicializarAdministracion(); // interfaz/administracion.js
 
 if (MODO_PRUEBA) {
   banco.cargarDatosDePrueba();

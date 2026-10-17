@@ -182,6 +182,11 @@
           </div>
 
           <button type="submit" class="boton-principal boton-ancho">Registrarme</button>
+          <!-- Solo se ve cuando el administrador está agregando un cliente -->
+          <p id="registro-modo-admin" class="formulario-alterno oculto">
+            Estás agregando un cliente como administrador.
+            <button type="button" id="registro-volver-admin" class="enlace">Volver a administración</button>
+          </p>
           <p class="formulario-alterno">
             ¿Ya tienes cuenta?
             <button type="button" class="enlace" data-ir-a="seccion-login">Inicia sesión</button>
@@ -382,6 +387,43 @@
             </div>
           </dl>
 
+          <h4>Editar mis datos</h4>
+          <form id="perfil-datos-formulario" class="formulario" novalidate>
+            <div class="formulario-fila">
+              <div class="campo">
+                <label for="perfil-editar-tipo-documento">Tipo de documento</label>
+                <select id="perfil-editar-tipo-documento">
+                  <option value="cedula">Cédula</option>
+                  <option value="pasaporte">Pasaporte</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="perfil-editar-identificacion">Número de documento</label>
+                <input type="text" id="perfil-editar-identificacion" autocomplete="off">
+              </div>
+            </div>
+            <div class="campo">
+              <label for="perfil-editar-nombre">Nombre completo</label>
+              <input type="text" id="perfil-editar-nombre" autocomplete="off">
+            </div>
+            <div class="formulario-fila">
+              <div class="campo">
+                <label for="perfil-editar-celular">Celular</label>
+                <input type="text" id="perfil-editar-celular" inputmode="numeric" maxlength="10" autocomplete="off">
+              </div>
+              <div class="campo">
+                <label for="perfil-editar-correo">Correo electrónico</label>
+                <input type="email" id="perfil-editar-correo" autocomplete="off">
+              </div>
+            </div>
+            <div class="campo">
+              <label for="perfil-editar-usuario">Nombre de usuario</label>
+              <input type="text" id="perfil-editar-usuario" autocomplete="off">
+              <p class="ayuda">De 4 a 15 caracteres: letras sin tildes, números y guion bajo.</p>
+            </div>
+            <button type="submit" class="boton-principal">Guardar mis datos</button>
+          </form>
+
           <h4>Cambiar contraseña</h4>
           <form id="perfil-contrasena-formulario" class="formulario" novalidate>
             <div class="formulario-fila">
@@ -411,6 +453,80 @@
       </div>
     </section>
 
+    <!-- ===== Administración de clientes (CRUD) ===== -->
+    <section id="seccion-admin" class="seccion oculto">
+      <div class="panel">
+        <div class="panel-cabecera">
+          <h2 class="panel-saludo">Administración</h2>
+          <div class="admin-acciones">
+            <button type="button" id="admin-agregar" class="boton-principal boton-compacto">Agregar cliente</button>
+            <button type="button" id="admin-cerrar-sesion" class="boton-secundario boton-compacto">Cerrar sesión</button>
+          </div>
+        </div>
+
+        <div class="admin-bloque">
+          <h3>Clientes registrados <span id="admin-total" class="admin-total"></span></h3>
+          <div class="admin-tabla-contenedor">
+            <table class="admin-tabla">
+              <thead>
+                <tr>
+                  <th scope="col">Cliente</th>
+                  <th scope="col">Documento</th>
+                  <th scope="col">Contacto</th>
+                  <th scope="col">Cuentas</th>
+                  <th scope="col">Estado</th>
+                  <th scope="col"><span class="oculto-visual">Acciones</span></th>
+                </tr>
+              </thead>
+              <tbody id="admin-clientes"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="admin-edicion" class="admin-bloque oculto">
+          <h3>Editar cliente <span id="admin-edicion-usuario" class="admin-total"></span></h3>
+          <form id="admin-editar-formulario" class="formulario" novalidate>
+            <div class="formulario-fila">
+              <div class="campo">
+                <label for="admin-editar-tipo-documento">Tipo de documento</label>
+                <select id="admin-editar-tipo-documento">
+                  <option value="cedula">Cédula</option>
+                  <option value="pasaporte">Pasaporte</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="admin-editar-identificacion">Número de documento</label>
+                <input type="text" id="admin-editar-identificacion" autocomplete="off">
+              </div>
+            </div>
+            <div class="campo">
+              <label for="admin-editar-nombre">Nombre completo</label>
+              <input type="text" id="admin-editar-nombre" autocomplete="off">
+            </div>
+            <div class="formulario-fila">
+              <div class="campo">
+                <label for="admin-editar-celular">Celular</label>
+                <input type="text" id="admin-editar-celular" inputmode="numeric" maxlength="10" autocomplete="off">
+              </div>
+              <div class="campo">
+                <label for="admin-editar-correo">Correo electrónico</label>
+                <input type="email" id="admin-editar-correo" autocomplete="off">
+              </div>
+            </div>
+            <div class="campo">
+              <label for="admin-editar-usuario">Nombre de usuario</label>
+              <input type="text" id="admin-editar-usuario" autocomplete="off">
+              <p class="ayuda">De 4 a 15 caracteres: letras sin tildes, números y guion bajo.</p>
+            </div>
+            <div class="admin-acciones">
+              <button type="submit" class="boton-principal">Guardar cambios</button>
+              <button type="button" id="admin-editar-cancelar" class="boton-secundario">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <footer class="pie">
@@ -435,6 +551,8 @@
   <script src="js/clases/CuentaAhorros.js"></script>
   <script src="js/clases/CuentaCorriente.js"></script>
   <script src="js/clases/TarjetaCredito.js"></script>
+  <script src="js/clases/Usuario.js"></script>
+  <script src="js/clases/Administrador.js"></script>
   <script src="js/clases/Cliente.js"></script>
   <script src="js/clases/Banco.js"></script>
   <script src="js/interfaz/registro.js"></script>
@@ -443,6 +561,7 @@
   <script src="js/interfaz/consultas.js"></script>
   <script src="js/interfaz/tarjeta.js"></script>
   <script src="js/interfaz/perfil.js"></script>
+  <script src="js/interfaz/administracion.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

@@ -33,6 +33,18 @@ function inicializarRegistro() {
       saldoInicial: document.getElementById("registro-saldo-inicial").value, // lo valida Banco
     };
 
+    // Si el administrador está agregando un cliente, se usa agregarCliente()
+    // y al terminar vuelve a su panel. Las validaciones son las mismas.
+    if (banco.administradorActivo) {
+      const respuesta = banco.agregarCliente(datos);
+      if (respuesta.tipo === "exito") {
+        formulario.reset();
+        entrarAlPanelAdministrador();
+      }
+      mostrarMensaje(respuesta);
+      return;
+    }
+
     const respuesta = banco.registrarCliente(datos);
 
     if (respuesta.tipo === "exito") {
