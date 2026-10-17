@@ -52,4 +52,60 @@ function inicializarOperaciones() {
       banco.guardar();
     }
   });
+
+  document.getElementById("transferir-formulario").addEventListener("submit", (evento) => {
+    evento.preventDefault();
+
+    const cuenta = obtenerCuentaSeleccionada();
+    if (cuenta === null) {
+      mostrarMensaje(crearRespuesta("error", "Inicia sesión para hacer transferencias."));
+      return;
+    }
+
+    const campoNumero = document.getElementById("transferir-numero");
+    const campoMonto = document.getElementById("transferir-monto");
+    const vistaDestinatario = document.getElementById("transferir-destinatario");
+    const destino = banco.consultarDestinoTransferencia(campoNumero.value);
+    if (destino.tipo !== "exito") {
+      vistaDestinatario.textContent = destino.mensaje;
+      mostrarMensaje(destino);
+      return;
+    }
+
+    const tipoCuenta = nombreProducto(destino.datos.tipoCuenta);
+    const confirmacion = window.confirm(
+      "Vas a transferir dinero a " + destino.datos.nombreCompleto +
+      " (" + tipoCuenta + " Nº " + destino.datos.numero + "). ¿Deseas continuar?"
+    );
+    if (!confirmacion) {
+      return;
+    }
+
+    const respuesta = banco.transferir(cuenta, campoNumero.value, convertirMonto(campoMonto.value));
+
+    mostrarMensaje(respuesta);
+    if (respuesta.tipo === "exito") {
+      campoNumero.value = "";
+      campoMonto.value = "";
+      vistaDestinatario.textContent = "";
+    }
+  });
+
+  document.getElementById("transferir-numero").addEventListener("input", (evento) => {
+    const campo = evento.currentTarget;
+    const vistaDestinatario = document.getElementById("transferir-destinatario");
+    vistaDestinatario.textContent = "";
+    if (campo.value.trim() === "") {
+      return;
+    }
+
+    const respuesta = banco.consultarDestinoTransferencia(campo.value);
+    if (respuesta.tipo === "exito") {
+      vistaDestinatario.textContent =
+        "Destinatario: " + respuesta.datos.nombreCompleto + " — " +
+        nombreProducto(respuesta.datos.tipoCuenta) + " Nº " + respuesta.datos.numero;
+    } else if (/^\d{6}$/.test(campo.value.trim())) {
+      vistaDestinatario.textContent = respuesta.mensaje;
+    }
+  });
 }

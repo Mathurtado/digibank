@@ -68,10 +68,12 @@ function inicializarConsultas() {
 
     movimientos.forEach((m) => {
       const item = document.createElement("li");
+      const cuentaRelacionada = m.cuentaDestino || m.cuentaOrigen;
+      const detalleCuenta = cuentaRelacionada ? " | Cuenta Nº " + cuentaRelacionada : "";
       item.textContent =
         m.fecha.toLocaleString("es-CO") + " | " +
         NOMBRES_TIPO[m.tipo] + " | " +
-        formatearMoneda(m.valor) + " | Saldo: " +
+        formatearMoneda(m.valor) + detalleCuenta + " | Saldo: " +
         formatearMoneda(m.saldoResultante);
       lista.appendChild(item);
     });

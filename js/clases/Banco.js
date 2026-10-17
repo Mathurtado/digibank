@@ -378,6 +378,70 @@ class Banco {
     return new TarjetaCredito(numero);
   }
 
+  // Busca una cuenta de ahorros o corriente y devuelve solo los datos
+  // necesarios para identificar al destinatario antes de transferir.
+  consultarDestinoTransferencia(numeroDestino) {
+    if (this.clienteActivo === null) {
+      return crearRespuesta("error", "Inicia sesión para consultar el destinatario.");
+    }
+
+    const destino = this.#buscarCuentaDestino(numeroDestino);
+    if (destino.tipo !== "exito") {
+      return destino;
+    }
+
+    return crearRespuesta(
+      "exito",
+      "Destinatario encontrado.",
+      {
+        numero: destino.datos.cuenta.numero,
+        tipoCuenta: destino.datos.cuenta.tipo,
+        nombreCompleto: destino.datos.cliente.nombreCompleto,
+        esMismoUsuario: destino.datos.cliente === this.clienteActivo,
+      }
+    );
+  }
+
+  // Transfiere desde una cuenta del cliente activo a cualquier cuenta bancaria.
+  transferir(origen, numeroDestino, monto) {
+    if (this.clienteActivo === null) {
+      return crearRespuesta("error", "Inicia sesión para hacer transferencias.");
+    }
+    if (!this.clienteActivo.cuentas.includes(origen)) {
+      return crearRespuesta("error", "La cuenta de origen no pertenece al cliente activo.");
+    }
+
+    const busqueda = this.#buscarCuentaDestino(numeroDestino);
+    if (busqueda.tipo !== "exito") {
+      return busqueda;
+    }
+
+    const destino = busqueda.datos.cuenta;
+    const respuesta = origen.transferirA(destino, monto);
+    if (respuesta.tipo === "exito") {
+      this.guardar();
+    }
+    return respuesta;
+  }
+
+  #buscarCuentaDestino(numeroDestino) {
+    const numeroBuscado = String(numeroDestino || "").trim();
+    if (!/^\d{6}$/.test(numeroBuscado)) {
+      return crearRespuesta("error", "Ingresa un número de cuenta válido de 6 dígitos.");
+    }
+
+    for (const cliente of this.#clientes) {
+      const cuenta = cliente.cuentas.find((producto) => producto.numero === numeroBuscado);
+      if (cuenta !== undefined) {
+        if (cuenta.tipo === TIPO_TARJETA) {
+          return crearRespuesta("error", "Las transferencias solo están disponibles entre cuentas de ahorros y corriente.");
+        }
+        return crearRespuesta("exito", "Cuenta encontrada.", { cuenta, cliente });
+      }
+    }
+    return crearRespuesta("error", "No encontramos una cuenta con ese número.");
+  }
+
   // ---------- Almacenamiento (localStorage) ----------
 
   // Guarda todos los clientes y sus cuentas en el navegador.
