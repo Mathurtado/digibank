@@ -713,36 +713,4 @@ class Banco {
     }
     return new TarjetaCredito(datos.numero, datos.cupo, datos);
   }
-
-  // ---------- Datos de prueba (BORRAR antes de la entrega final) ----------
-
-  // Crea un cliente para que Juan y Sebastián puedan probar sin esperar
-  // el registro. Usuario: prueba / Contraseña: prueba123
-  // Además deja la sesión iniciada con ese cliente.
-  // Si ya estaba guardado (de una visita anterior), lo reutiliza.
-  cargarDatosDePrueba() {
-    const guardado = this.buscarPorUsuario("prueba");
-    if (guardado !== null) {
-      this.#clienteActivo = guardado;
-      return;
-    }
-
-    const cuentas = [
-      this.#crearCuenta("ahorros"),
-      this.#crearCuenta("corriente"),
-      this.#crearCuenta(TIPO_TARJETA),
-    ];
-    const cliente = new Cliente({
-      tipoDocumento: "cedula",
-      identificacion: "1000000000",
-      nombreCompleto: "Cliente De Prueba",
-      celular: "3000000000",
-      correo: "prueba@miplata.com",
-      usuario: "prueba",
-      contrasena: "prueba123",
-    }, cuentas);
-    this.#clientes.push(cliente);
-    this.guardar();
-    this.#clienteActivo = cliente;
-  }
 }
