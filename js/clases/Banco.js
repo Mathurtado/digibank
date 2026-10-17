@@ -6,18 +6,26 @@
 class Banco {
   #clientes;
   #siguienteNumeroCuenta;
-  #clienteActivo; // Cliente que inició sesión, o null
+  #clienteActivo;       // Cliente que inició sesión, o null
+  #administrador;       // Único administrador (usuario y clave fijos)
+  #administradorActivo; // true si el que inició sesión es el administrador
 
   constructor() {
     this.#clientes = [];
     this.#siguienteNumeroCuenta = 1;
     this.#clienteActivo = null;
+    this.#administrador = new Administrador();
+    this.#administradorActivo = false;
   }
 
   // Solo lectura: la sesión solo se abre con iniciarSesion() y se cierra
   // con cerrarSesion(). Nadie puede "entrar" como otro cliente asignándolo.
   get clienteActivo() {
     return this.#clienteActivo;
+  }
+
+  get administradorActivo() {
+    return this.#administradorActivo;
   }
 
   // ---------- Registro (Mateo, rama 4-registrar-clientes) ----------
@@ -124,9 +132,44 @@ class Banco {
     return texto === "" ? 0 : convertirMonto(texto);
   }
 
-  // Revisa los datos en el orden del formulario.
+  // Revisa los datos del registro en el orden del formulario.
   // Devuelve una respuesta de error con el primer problema, o null si todo está bien.
   #validarDatosRegistro(d) {
+    // ----- Datos personales: los mismos que se editan en el perfil -----
+    const errorDatos = this.#validarDatosPersonales(d, null);
+    if (errorDatos !== null) {
+      return errorDatos;
+    }
+
+    // ----- Contraseña y confirmación -----
+    const errorContrasena = this.#validarContrasena(d.contrasena, d.confirmacion);
+    if (errorContrasena !== null) {
+      return errorContrasena;
+    }
+
+    // ----- Tipo de cuenta -----
+    if (d.tiposCuenta.length === 0) {
+      return crearRespuesta("error", "Elige al menos un tipo de cuenta: ahorros o corriente.");
+    }
+    const tiposValidos = d.tiposCuenta.every((tipo) => TIPOS_CUENTA.includes(tipo));
+    const sinRepetir = new Set(d.tiposCuenta).size === d.tiposCuenta.length;
+    if (!tiposValidos || !sinRepetir) {
+      return crearRespuesta("error", "Los tipos de cuenta elegidos no son válidos.");
+    }
+
+    // ----- Saldo inicial (opcional) -----
+    if (!Number.isInteger(d.saldoInicial) || d.saldoInicial < 0) {
+      return crearRespuesta("error", "El saldo inicial debe ser un número entero de $0 o más.");
+    }
+
+    return null; // todo está bien
+  }
+
+  // Revisa documento, nombre, celular, correo y usuario.
+  // La usan el registro (clienteEditado = null), el perfil y el administrador
+  // (clienteEditado = el cliente que se edita: su propio documento y su
+  // propio usuario no cuentan como repetidos).
+  #validarDatosPersonales(d, clienteEditado) {
     // ----- Tipo de documento -----
     if (!TIPOS_DOCUMENTO.includes(d.tipoDocumento)) {
       return crearRespuesta("error", "Selecciona un tipo de documento válido.");
@@ -157,7 +200,10 @@ class Banco {
         );
       }
     }
-    if (this.existeIdentificacion(d.tipoDocumento, d.identificacion)) {
+    const mismoDocumento = this.#clientes.find(
+      (c) => c.tipoDocumento === d.tipoDocumento && c.identificacion === d.identificacion
+    );
+    if (mismoDocumento !== undefined && mismoDocumento !== clienteEditado) {
       return crearRespuesta("error", "Ya existe un cliente registrado con ese documento.");
     }
 
@@ -208,32 +254,13 @@ class Banco {
         "El usuario debe tener entre " + MIN_CARACTERES_USUARIO + " y " + MAX_CARACTERES_USUARIO + " caracteres."
       );
     }
-    if (this.buscarPorUsuario(d.usuario) !== null) {
+    // El nombre del administrador está reservado
+    const mismoUsuario = this.buscarPorUsuario(d.usuario);
+    if ((mismoUsuario !== null && mismoUsuario !== clienteEditado) || d.usuario === USUARIO_ADMINISTRADOR) {
       return crearRespuesta("error", "Ese nombre de usuario ya está en uso. Elige otro.");
     }
 
-    // ----- Contraseña y confirmación -----
-    const errorContrasena = this.#validarContrasena(d.contrasena, d.confirmacion);
-    if (errorContrasena !== null) {
-      return errorContrasena;
-    }
-
-    // ----- Tipo de cuenta -----
-    if (d.tiposCuenta.length === 0) {
-      return crearRespuesta("error", "Elige al menos un tipo de cuenta: ahorros o corriente.");
-    }
-    const tiposValidos = d.tiposCuenta.every((tipo) => TIPOS_CUENTA.includes(tipo));
-    const sinRepetir = new Set(d.tiposCuenta).size === d.tiposCuenta.length;
-    if (!tiposValidos || !sinRepetir) {
-      return crearRespuesta("error", "Los tipos de cuenta elegidos no son válidos.");
-    }
-
-    // ----- Saldo inicial (opcional) -----
-    if (!Number.isInteger(d.saldoInicial) || d.saldoInicial < 0) {
-      return crearRespuesta("error", "El saldo inicial debe ser un número entero de $0 o más.");
-    }
-
-    return null; // todo está bien
+    return null; // datos personales correctos
   }
 
   // ---------- Regla de contraseña: la usan el registro y el perfil ----------
@@ -260,6 +287,34 @@ class Banco {
       return crearRespuesta("error", "Las contraseñas no coinciden.");
     }
     return null;
+  }
+
+  // ---------- Perfil: editar datos ----------
+
+  /**
+   * El cliente que inició sesión modifica sus propios datos personales.
+   * datos: { tipoDocumento, identificacion, nombreCompleto, celular, correo, usuario }
+   * Devuelve: crearRespuesta(...)
+   */
+  actualizarPerfil(datos) {
+    if (this.#clienteActivo === null) {
+      return crearRespuesta("error", "Inicia sesión para cambiar tus datos.");
+    }
+    return this.#editarCliente(this.#clienteActivo, datos, "Tus datos se guardaron correctamente.");
+  }
+
+  // Privado: lo comparten el perfil (actualizarPerfil) y el administrador
+  // (editarCliente). Limpia y valida igual que el registro; las cuentas y
+  // la contraseña no se tocan aquí.
+  #editarCliente(cliente, datos, mensajeExito) {
+    const limpios = this.#normalizarDatosRegistro(datos);
+    const error = this.#validarDatosPersonales(limpios, cliente);
+    if (error !== null) {
+      return error;
+    }
+    cliente.actualizarDatos(limpios);
+    this.guardar();
+    return crearRespuesta("exito", mensajeExito, { usuario: cliente.usuario });
   }
 
   // ---------- Perfil: cambiar contraseña ----------
@@ -348,9 +403,14 @@ class Banco {
       return crearRespuesta("error", "Ingresa tu usuario y contraseña.");
     }
 
-    // Paso 2: buscar al cliente. Si no existe, el mensaje es el MISMO
-    // que con contraseña incorrecta, para no revelar qué usuarios existen.
-    const cliente = this.buscarPorUsuario(textoUsuario);
+    // Paso 2: buscar al usuario: el administrador o un cliente.
+    // Si no existe, el mensaje es el MISMO que con contraseña incorrecta,
+    // para no revelar qué usuarios existen.
+    // POLIMORFISMO: desde aquí "cliente" puede ser un Cliente o el
+    // Administrador; los dos son Usuario y responden a los mismos métodos.
+    const cliente = textoUsuario.toLowerCase() === USUARIO_ADMINISTRADOR
+      ? this.#administrador
+      : this.buscarPorUsuario(textoUsuario);
     if (cliente === null) {
       return crearRespuesta("error", "Usuario o contraseña incorrectos.");
     }
@@ -375,12 +435,15 @@ class Banco {
       });
     }
 
-    // Paso 5: todo bien. Se reinicia el contador y se abre la sesión.
+    // Paso 5: todo bien. Se reinicia el contador y se abre la sesión
+    // del tipo que corresponda.
     cliente.reiniciarIntentos();
     this.guardar();
-    this.#clienteActivo = cliente;
+    this.#administradorActivo = cliente.esAdministrador();
+    this.#clienteActivo = cliente.esAdministrador() ? null : cliente;
     return crearRespuesta("exito", "Bienvenido, " + cliente.nombreCompleto + ".", {
       intentosRestantes: MAX_INTENTOS,
+      esAdministrador: cliente.esAdministrador(),
     });
   }
 
@@ -399,6 +462,101 @@ class Banco {
 
   cerrarSesion() {
     this.#clienteActivo = null;
+    this.#administradorActivo = false;
+  }
+
+  // ---------- Administración de clientes (CRUD) ----------
+  // Todos estos métodos exigen que haya iniciado sesión el administrador.
+
+  // Lista de clientes como objetos simples (copias): quien la recibe no
+  // puede modificar a los clientes ni a sus cuentas.
+  listarClientes() {
+    if (!this.#administradorActivo) {
+      return [];
+    }
+    return this.#clientes.map((cliente) => ({
+      usuario: cliente.usuario,
+      nombreCompleto: cliente.nombreCompleto,
+      tipoDocumento: cliente.tipoDocumento,
+      identificacion: cliente.identificacion,
+      celular: cliente.celular,
+      correo: cliente.correo,
+      bloqueado: cliente.estaBloqueado(),
+      cuentas: cliente.cuentas.map((cuenta) => ({
+        tipo: cuenta.tipo,
+        numero: cuenta.numero,
+        saldo: cuenta.saldo,
+      })),
+    }));
+  }
+
+  // CREAR: usa exactamente el mismo registro y las mismas validaciones.
+  agregarCliente(datos) {
+    if (!this.#administradorActivo) {
+      return crearRespuesta("error", "Solo el administrador puede agregar clientes.");
+    }
+    const respuesta = this.registrarCliente(datos);
+    if (respuesta.tipo !== "exito") {
+      return respuesta;
+    }
+    return crearRespuesta("exito", "Cliente " + respuesta.datos.usuario + " agregado.", respuesta.datos);
+  }
+
+  // EDITAR: mismos campos y reglas que el perfil del cliente.
+  editarCliente(usuario, datos) {
+    if (!this.#administradorActivo) {
+      return crearRespuesta("error", "Solo el administrador puede editar clientes.");
+    }
+    const cliente = this.buscarPorUsuario(usuario);
+    if (cliente === null) {
+      return crearRespuesta("error", "No existe un cliente con ese usuario.");
+    }
+    return this.#editarCliente(cliente, datos, "Datos de " + cliente.nombreCompleto + " actualizados.");
+  }
+
+  // Quita el bloqueo por intentos fallidos.
+  desbloquearCliente(usuario) {
+    if (!this.#administradorActivo) {
+      return crearRespuesta("error", "Solo el administrador puede desbloquear clientes.");
+    }
+    const cliente = this.buscarPorUsuario(usuario);
+    if (cliente === null) {
+      return crearRespuesta("error", "No existe un cliente con ese usuario.");
+    }
+    if (!cliente.estaBloqueado()) {
+      return crearRespuesta("advertencia", "La cuenta de " + cliente.nombreCompleto + " no está bloqueada.");
+    }
+    cliente.reiniciarIntentos();
+    this.guardar();
+    return crearRespuesta("exito", "Se desbloqueó la cuenta de " + cliente.nombreCompleto + ".");
+  }
+
+  // ELIMINAR: solo si todas sus cuentas están en $0 y la tarjeta no tiene
+  // deuda, para no hacer desaparecer dinero. La confirmación la pide la interfaz.
+  eliminarCliente(usuario) {
+    if (!this.#administradorActivo) {
+      return crearRespuesta("error", "Solo el administrador puede eliminar clientes.");
+    }
+    const cliente = this.buscarPorUsuario(usuario);
+    if (cliente === null) {
+      return crearRespuesta("error", "No existe un cliente con ese usuario.");
+    }
+
+    const cuentaConSaldo = cliente.cuentas.find((cuenta) => cuenta.saldo !== 0);
+    if (cuentaConSaldo !== undefined) {
+      const detalle = cuentaConSaldo.tipo === TIPO_TARJETA
+        ? "una deuda de " + formatearMoneda(cuentaConSaldo.deuda) + " en la tarjeta de crédito"
+        : formatearMoneda(cuentaConSaldo.saldo) + " en su " + nombreProducto(cuentaConSaldo.tipo).toLowerCase();
+      return crearRespuesta(
+        "error",
+        "No se puede eliminar a " + cliente.nombreCompleto + ": tiene " + detalle +
+          ". Todas sus cuentas deben quedar en $0."
+      );
+    }
+
+    this.#clientes = this.#clientes.filter((c) => c !== cliente);
+    this.guardar();
+    return crearRespuesta("exito", "Cliente " + cliente.nombreCompleto + " eliminado.");
   }
 
   // ---------- Cuentas ----------

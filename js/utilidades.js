@@ -9,6 +9,11 @@
 const MAX_INTENTOS = 3;
 const MINUTOS_BLOQUEO = 5;
 
+// ---------- Administrador (CRUD de clientes) ----------
+// Usuario fijo: no se registra ni se guarda en localStorage.
+const USUARIO_ADMINISTRADOR = "admin";
+const CONTRASENA_ADMINISTRADOR = "Admin123";
+
 // ---------- Reglas de registro ----------
 const MIN_CARACTERES_CONTRASENA = 6;
 const MIN_DIGITOS_CEDULA = 6;

@@ -18,7 +18,12 @@ function inicializarLogin() {
     if (respuesta.tipo === "exito") {
       formulario.reset();
       textoIntentos.classList.add("oculto");
-      entrarAlPanel();
+      // El administrador entra a su propio panel (interfaz/administracion.js)
+      if (respuesta.datos.esAdministrador) {
+        entrarAlPanelAdministrador();
+      } else {
+        entrarAlPanel();
+      }
       mostrarMensaje(respuesta);
       return;
     }
