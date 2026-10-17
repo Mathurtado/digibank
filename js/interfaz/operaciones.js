@@ -74,7 +74,7 @@ function inicializarOperaciones() {
 
     const tipoCuenta = nombreProducto(destino.datos.tipoCuenta);
     const confirmacion = window.confirm(
-      "Vas a transferir dinero a " + destino.datos.nombreCompleto +
+      "Vas a transferir dinero a " + destino.datos.nombreDestinatario +
       " (" + tipoCuenta + " Nº " + destino.datos.numero + "). ¿Deseas continuar?"
     );
     if (!confirmacion) {
@@ -102,7 +102,7 @@ function inicializarOperaciones() {
     const respuesta = banco.consultarDestinoTransferencia(campo.value);
     if (respuesta.tipo === "exito") {
       vistaDestinatario.textContent =
-        "Destinatario: " + respuesta.datos.nombreCompleto + " — " +
+        "Destinatario: " + respuesta.datos.nombreDestinatario + " — " +
         nombreProducto(respuesta.datos.tipoCuenta) + " Nº " + respuesta.datos.numero;
     } else if (/^\d{6}$/.test(campo.value.trim())) {
       vistaDestinatario.textContent = respuesta.mensaje;

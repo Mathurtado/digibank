@@ -1,6 +1,7 @@
 // =============================================================
 // interfaz/perfil.js — Muestra los datos del cliente y conecta el
-// formulario para cambiar la contraseña.
+// formulario para cambiar la contraseña
+// (usuario -> clave actual -> clave nueva -> confirmación).
 // Esta capa NO valida reglas: solo lee los campos, llama a Banco
 // y muestra la respuesta.
 // =============================================================
@@ -13,6 +14,7 @@ function inicializarPerfil() {
     evento.preventDefault(); // evita que la página se recargue
 
     const respuesta = banco.cambiarContrasena(
+      document.getElementById("perfil-contrasena-usuario").value,
       document.getElementById("perfil-contrasena-actual").value,
       document.getElementById("perfil-contrasena-nueva").value,
       document.getElementById("perfil-contrasena-confirmacion").value
@@ -20,7 +22,13 @@ function inicializarPerfil() {
 
     // Las contraseñas nunca se dejan escritas en pantalla, haya o no error
     formularioContrasena.reset();
-    mostrarMensaje(respuesta);
+
+    // Si el tercer fallo bloqueó la cuenta, Banco ya cerró la sesión:
+    // se vuelve al inicio de sesión.
+    if (respuesta.datos !== null && respuesta.datos.sesionCerrada) {
+      mostrarSeccion("seccion-login");
+    }
+    mostrarMensaje(respuesta); // después de cambiar de sección, para que no se borre
   });
 }
 
