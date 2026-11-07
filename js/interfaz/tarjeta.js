@@ -12,6 +12,7 @@ function inicializarTarjeta() {
   const campoMonto = document.getElementById("tarjeta-monto");
   const campoDescripcion = document.getElementById("tarjeta-descripcion");
   const campoPago = document.getElementById("tarjeta-pago-monto");
+  const selectorPagoCuenta = document.getElementById("tarjeta-pago-cuenta");
   const textoSimulacion = document.getElementById("tarjeta-simulacion");
 
   // Opciones de cuotas: de MIN_CUOTAS_TARJETA a MAX_CUOTAS_TARJETA
@@ -43,6 +44,19 @@ function inicializarTarjeta() {
     document.getElementById("tarjeta-deuda").textContent = formatearMoneda(tarjeta.deuda);
     document.getElementById("tarjeta-disponible").textContent = formatearMoneda(tarjeta.limiteRetiro());
     document.getElementById("tarjeta-pago-mensual").textContent = formatearMoneda(tarjeta.pagoMensualEstimado());
+    const cuentaPagoSeleccionada = selectorPagoCuenta.value;
+    selectorPagoCuenta.innerHTML = "";
+    banco.clienteActivo.cuentas
+      .filter((cuenta) => cuenta.tipo !== TIPO_TARJETA)
+      .forEach((cuenta) => {
+        const opcion = document.createElement("option");
+        opcion.value = cuenta.numero;
+        opcion.textContent = nombreProducto(cuenta.tipo) + " Nº " + cuenta.numero;
+        selectorPagoCuenta.appendChild(opcion);
+      });
+    if ([...selectorPagoCuenta.options].some((opcion) => opcion.value === cuentaPagoSeleccionada)) {
+      selectorPagoCuenta.value = cuentaPagoSeleccionada;
+    }
 
     const lista = document.getElementById("tarjeta-compras");
     lista.innerHTML = "";
@@ -128,12 +142,40 @@ function inicializarTarjeta() {
       return;
     }
 
-    const respuesta = tarjeta.consignar(convertirMonto(campoPago.value));
+    const monto = convertirMonto(campoPago.value);
+    const cuentaPrincipal = banco.clienteActivo.cuentas.find((cuenta) =>
+      cuenta.numero === selectorPagoCuenta.value && cuenta.tipo !== TIPO_TARJETA
+    );
+    if (!Number.isInteger(monto) || monto <= 0) {
+      mostrarMensaje(tarjeta.consignar(monto));
+      return;
+    }
+    if (cuentaPrincipal === null) {
+      mostrarMensaje(crearRespuesta("error", "No tienes una cuenta principal para realizar el pago."));
+      return;
+    }
+    if (tarjeta.deuda === 0) {
+      mostrarMensaje(crearRespuesta("advertencia", "Tu tarjeta no tiene deuda. No hay nada que pagar."));
+      return;
+    }
+    if (monto > tarjeta.deuda) {
+      mostrarMensaje(crearRespuesta("error", "El pago no puede superar la deuda de " + formatearMoneda(tarjeta.deuda) + "."));
+      return;
+    }
+
+    const respuestaPrincipal = cuentaPrincipal.retirar(monto);
+    if (respuestaPrincipal.tipo !== "exito") {
+      mostrarMensaje(respuestaPrincipal);
+      return;
+    }
+
+    const respuesta = tarjeta.consignar(monto);
     mostrarMensaje(respuesta);
     if (respuesta.tipo === "exito") {
       campoPago.value = "";
       banco.guardar();
     }
+    actualizarSaldo();
     mostrarTarjeta();
   });
 
