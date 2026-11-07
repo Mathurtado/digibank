@@ -550,6 +550,18 @@
     <p class="pie-legal">© 2026 DigiBank. Proyecto académico de CESDE: banco simulado que no maneja dinero real.</p>
   </footer>
 
+  <div id="confirmacion-operacion" class="confirmacion oculto" role="dialog" aria-modal="true" aria-labelledby="confirmacion-titulo" aria-describedby="confirmacion-detalle">
+    <div class="confirmacion-contenido">
+      <p class="confirmacion-etiqueta">DigiBank</p>
+      <h2 id="confirmacion-titulo">Confirmar operación</h2>
+      <p id="confirmacion-detalle"></p>
+      <div class="confirmacion-acciones">
+        <button type="button" id="confirmacion-cancelar" class="boton-secundario">Cancelar</button>
+        <button type="button" id="confirmacion-aceptar" class="boton-principal">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== Scripts: el ORDEN importa (ver contrato) ===== -->
   <script src="js/utilidades.js"></script>
   <script src="js/clases/Cuenta.js"></script>
