@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DigiBank</title>
+  <meta name="description" content="DigiBank: cuentas de ahorro y corriente, tarjeta de crédito y transferencias en un solo lugar.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Public+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+  <!-- ===== Encabezado y menú ===== -->
+  <header class="encabezado">
+    <div class="encabezado-contenido">
+      <div class="marca">
+        <span class="marca-sello" aria-hidden="true">D</span>
+        <span class="marca-nombre">DigiBank</span>
+      </div>
+      <!-- El menú público se oculta solo (con CSS) mientras el panel está abierto -->
+      <nav id="menu-publico" class="menu" aria-label="Menú principal">
+        <button type="button" class="menu-enlace" data-ir-a="seccion-inicio">Inicio</button>
+        <button type="button" class="menu-enlace" data-ir-a="seccion-login">Iniciar sesión</button>
+        <button type="button" class="boton-principal boton-compacto" data-ir-a="seccion-registro">Abrir mi cuenta</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Mensajes de retroalimentación: éxito, error o advertencia -->
+  <div id="mensaje" class="mensaje oculto" role="status" aria-live="polite"></div>
+
+  <main>
+
+    <!-- ===== Página de inicio (rama 47) ===== -->
+    <section id="seccion-inicio" class="seccion">
+
+      <div class="portada">
+        <div class="portada-texto">
+          <h1 class="portada-titulo">Tu dinero, bien administrado.</h1>
+          <p class="portada-descripcion">
+            Cuentas de ahorro y corriente, tarjeta de crédito y transferencias en un solo lugar.
+            Abre tu cuenta en minutos y maneja tu dinero cuando lo necesites.
+          </p>
+          <div class="portada-acciones">
+            <button type="button" class="boton-principal" data-ir-a="seccion-registro">Abrir mi cuenta</button>
+            <button type="button" class="boton-secundario" data-ir-a="seccion-login">Ya soy cliente</button>
+          </div>
+        </div>
+
+        <!-- Tarjeta ilustrativa: es decorativa -->
+        <div class="portada-tarjeta" aria-hidden="true">
+          <div class="tarjeta-plastico">
+            <span class="tarjeta-marca">DigiBank</span>
+            <span class="tarjeta-chip"></span>
+            <span class="tarjeta-numero">5412&nbsp;&nbsp;7700&nbsp;&nbsp;0421&nbsp;&nbsp;2048</span>
+            <span class="tarjeta-titular">Valentina Restrepo</span>
+            <span class="tarjeta-vence">10/30</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="institucional">
+        <h2 class="institucional-titulo">Productos pensados para cada momento</h2>
+        <dl class="productos">
+          <div class="producto">
+            <dt>Cuenta de ahorros</dt>
+            <dd class="producto-dato">1,5&nbsp;% de rendimiento mensual</dd>
+            <dd class="producto-detalle">Guarda tu dinero a mediano y largo plazo. En tu primer retiro de cada mes te abonamos el 1,5&nbsp;% de tu saldo.</dd>
+          </div>
+          <div class="producto">
+            <dt>Cuenta corriente</dt>
+            <dd class="producto-dato">Sobregiro de hasta el 20&nbsp;%</dd>
+            <dd class="producto-detalle">Para recibir tu nómina, pagar tus facturas y transferir en el día a día.</dd>
+          </div>
+          <div class="producto">
+            <dt>Tarjeta de crédito</dt>
+            <dd class="producto-dato">Hasta 2 cuotas sin interés</dd>
+            <dd class="producto-detalle">Elige el número de cuotas y conoce tu pago mensual antes de comprar.</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="pasos">
+        <h2 class="pasos-titulo">Empieza en tres pasos</h2>
+        <ol class="pasos-lista">
+          <li>
+            <h3>Regístrate</h3>
+            <p>Con tu cédula o pasaporte, tu celular y un nombre de usuario.</p>
+          </li>
+          <li>
+            <h3>Elige tus productos</h3>
+            <p>Cuenta de ahorros, cuenta corriente o ambas, y si quieres, tu tarjeta de crédito.</p>
+          </li>
+          <li>
+            <h3>Maneja tu dinero</h3>
+            <p>Consulta tu saldo, consigna, retira y revisa tus movimientos desde tu panel.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===== Registro (rama 4) ===== -->
+    <section id="seccion-registro" class="seccion oculto">
+      <div class="acceso">
+        <aside class="acceso-marca">
+          <h2>Abre tu cuenta</h2>
+          <p>Tus datos solo se usan para identificarte. Tu documento y tu nombre de usuario deben ser únicos.</p>
+        </aside>
+
+        <form id="registro-formulario" class="formulario" novalidate>
+          <div class="formulario-fila">
+            <div class="campo">
+              <label for="registro-tipo-documento">Tipo de documento</label>
+              <select id="registro-tipo-documento">
+                <option value="cedula">Cédula</option>
+                <option value="pasaporte">Pasaporte</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label for="registro-identificacion">Número de documento</label>
+              <input type="text" id="registro-identificacion" autocomplete="off">
+            </div>
+          </div>
+
+          <div class="campo">
+            <label for="registro-nombre">Nombre completo</label>
+            <input type="text" id="registro-nombre" autocomplete="name">
+          </div>
+
+          <div class="formulario-fila">
+            <div class="campo">
+              <label for="registro-celular">Celular</label>
+              <input type="text" id="registro-celular" inputmode="numeric" maxlength="10" autocomplete="tel">
+            </div>
+            <div class="campo">
+              <label for="registro-correo">Correo electrónico</label>
+              <input type="email" id="registro-correo" autocomplete="email">
+            </div>
+          </div>
+
+          <div class="campo">
+            <label for="registro-usuario">Nombre de usuario</label>
+            <input type="text" id="registro-usuario" autocomplete="username">
+            <p class="ayuda">De 4 a 15 caracteres: letras sin tildes, números y guion bajo.</p>
+          </div>
+
+          <div class="formulario-fila">
+            <div class="campo">
+              <label for="registro-contrasena">Contraseña</label>
+              <input type="password" id="registro-contrasena" autocomplete="new-password">
+            </div>
+            <div class="campo">
+              <label for="registro-confirmacion">Confirmar contraseña</label>
+              <input type="password" id="registro-confirmacion" autocomplete="new-password">
+            </div>
+          </div>
+          <p class="ayuda">Mínimo 6 caracteres, con al menos una letra y un número.</p>
+
+          <fieldset class="opciones">
+            <legend>¿Qué cuentas quieres abrir?</legend>
+            <label class="opcion">
+              <input type="checkbox" id="registro-cuenta-ahorros" value="ahorros">
+              <span>Cuenta de ahorros</span>
+            </label>
+            <label class="opcion">
+              <input type="checkbox" id="registro-cuenta-corriente" value="corriente">
+              <span>Cuenta corriente</span>
+            </label>
+          </fieldset>
+
+          <label class="opcion opcion-tarjeta">
+            <input type="checkbox" id="registro-tarjeta">
+            <span>Quiero una tarjeta de crédito, con cupo de $2.000.000</span>
+          </label>
+
+          <div class="campo">
+            <label for="registro-saldo-inicial">Saldo inicial (opcional)</label>
+            <input type="text" id="registro-saldo-inicial" class="campo-monto" inputmode="numeric" autocomplete="off" placeholder="0">
+            <p class="ayuda">Se consigna en tu cuenta de ahorros o, si no la tienes, en la corriente.</p>
+          </div>
+
+          <button type="submit" class="boton-principal boton-ancho">Registrarme</button>
+          <!-- Solo se ve cuando el administrador está agregando un cliente -->
+          <p id="registro-modo-admin" class="formulario-alterno oculto">
+            Estás agregando un cliente como administrador.
+            <button type="button" id="registro-volver-admin" class="enlace">Volver a administración</button>
+          </p>
+          <p class="formulario-alterno">
+            ¿Ya tienes cuenta?
+            <button type="button" class="enlace" data-ir-a="seccion-login">Inicia sesión</button>
+          </p>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===== Inicio de sesión (rama 6) ===== -->
+    <section id="seccion-login" class="seccion oculto">
+      <div class="acceso">
+        <aside class="acceso-marca">
+          <h2>Bienvenido de nuevo</h2>
+          <p>Por tu seguridad, después de tres intentos fallidos la cuenta se bloquea durante cinco minutos.</p>
+        </aside>
+
+        <form id="login-formulario" class="formulario" novalidate>
+          <div class="campo">
+            <label for="login-usuario">Nombre de usuario</label>
+            <input type="text" id="login-usuario" autocomplete="username">
+          </div>
+
+          <div class="campo">
+            <label for="login-contrasena">Contraseña</label>
+            <input type="password" id="login-contrasena" autocomplete="current-password">
+          </div>
+
+          <!-- Contador visible de intentos (lo pide el profesor) -->
+          <p id="login-intentos" class="intentos oculto"></p>
+
+          <button type="submit" class="boton-principal boton-ancho">Entrar</button>
+          <p class="formulario-alterno">
+            ¿Todavía no eres cliente?
+            <button type="button" class="enlace" data-ir-a="seccion-registro">Abre tu cuenta</button>
+          </p>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===== Panel de transacciones (rama 48) ===== -->
+    <section id="seccion-panel" class="seccion oculto">
+      <div class="panel">
+        <div class="panel-cabecera">
+          <h2 class="panel-saludo">Hola, <span id="panel-nombre"></span></h2>
+          <div class="campo panel-selector">
+            <label for="panel-cuenta">Cuenta</label>
+            <select id="panel-cuenta"></select>
+          </div>
+        </div>
+
+        <nav class="menu-panel" aria-label="Operaciones">
+          <button type="button" data-ver="vista-saldo">Saldo</button>
+          <button type="button" data-ver="vista-consignar">Consignar</button>
+          <button type="button" data-ver="vista-retirar">Retirar</button>
+          <button type="button" data-ver="vista-transferir">Transferir</button>
+          <button type="button" data-ver="vista-movimientos">Movimientos</button>
+          <button type="button" data-ver="vista-tarjeta">Tarjeta</button>
+          <button type="button" data-ver="vista-perfil">Perfil</button>
+          <button type="button" id="panel-cerrar-sesion" class="menu-panel-salir">Cerrar sesión</button>
+        </nav>
+
+        <!-- Consultar saldo (rama 11) -->
+        <div id="vista-saldo" class="vista oculto">
+          <h3>Saldo disponible</h3>
+          <p id="saldo-fecha" class="saldo-fecha"></p>
+          <p id="saldo-valor" class="saldo"></p>
+        </div>
+
+        <!-- Consignar (rama 12) -->
+        <div id="vista-consignar" class="vista oculto">
+          <h3>Consignar dinero</h3>
+          <form id="consignar-formulario" class="formulario formulario-operacion" novalidate>
+            <div class="campo">
+              <label for="consignar-monto">Monto</label>
+              <input type="text" id="consignar-monto" class="campo-monto" inputmode="numeric" autocomplete="off" placeholder="0">
+            </div>
+            <button type="submit" class="boton-principal">Consignar</button>
+          </form>
+        </div>
+
+        <!-- Retirar (rama 13) -->
+        <div id="vista-retirar" class="vista oculto">
+          <h3>Retirar dinero</h3>
+          <form id="retirar-formulario" class="formulario formulario-operacion" novalidate>
+            <div class="campo">
+              <label for="retirar-monto">Monto</label>
+              <input type="text" id="retirar-monto" class="campo-monto" inputmode="numeric" autocomplete="off" placeholder="0">
+            </div>
+            <button type="submit" class="boton-principal">Retirar</button>
+          </form>
+          <p class="ayuda">En la cuenta de ahorros, el primer retiro de cada mes te abona antes el 1,5&nbsp;% de tu saldo. En la corriente puedes sobregirarte hasta un 20&nbsp;%.</p>
+        </div>
+
+        <!-- Transferir entre cuentas bancarias -->
+        <div id="vista-transferir" class="vista oculto">
+          <h3>Transferir dinero</h3>
+          <form id="transferir-formulario" class="formulario formulario-operacion" novalidate>
+            <div class="campo">
+              <label for="transferir-numero">Número de cuenta destino</label>
+              <input type="text" id="transferir-numero" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="6 dígitos">
+              <p id="transferir-destinatario" class="ayuda" aria-live="polite">Solo puedes transferir entre cuentas de ahorros y corriente.</p>
+            </div>
+            <div class="campo">
+              <label for="transferir-monto">Monto</label>
+              <input type="text" id="transferir-monto" class="campo-monto" inputmode="numeric" autocomplete="off" placeholder="0">
+            </div>
+            <button type="submit" class="boton-principal">Transferir</button>
+          </form>
+        </div>
+
+        <!-- Movimientos (rama 32) -->
+        <div id="vista-movimientos" class="vista oculto">
+          <h3>Movimientos</h3>
+          <ul id="movimientos-lista" class="movimientos"></ul>
+        </div>
+
+        <!-- Tarjeta de crédito (ramas 38 a 41) -->
+        <div id="vista-tarjeta" class="vista oculto">
+          <h3>Tarjeta de crédito</h3>
+          <p id="tarjeta-sin-tarjeta" class="ayuda oculto">No tienes tarjeta de crédito.</p>
+
+          <div id="tarjeta-contenido">
+            <dl class="tarjeta-resumen">
+              <div>
+                <dt>Cupo total</dt>
+                <dd id="tarjeta-cupo"></dd>
+              </div>
+              <div>
+                <dt>Deuda</dt>
+                <dd id="tarjeta-deuda"></dd>
+              </div>
+              <div>
+                <dt>Cupo disponible</dt>
+                <dd id="tarjeta-disponible"></dd>
+              </div>
+              <div>
+                <dt>Pago mensual estimado</dt>
+                <dd id="tarjeta-pago-mensual"></dd>
+              </div>
+            </dl>
+
+            <h4>Comprar en cuotas</h4>
+            <form id="tarjeta-compra-formulario" class="formulario" novalidate>
+              <div class="campo">
+                <label for="tarjeta-descripcion">Descripción (opcional)</label>
+                <input type="text" id="tarjeta-descripcion" maxlength="40" autocomplete="off">
+              </div>
+              <div class="formulario-fila">
+                <div class="campo">
+                  <label for="tarjeta-monto">Monto</label>
+                  <input type="text" id="tarjeta-monto" class="campo-monto" inputmode="numeric" autocomplete="off" placeholder="0">
+                </div>
+                <div class="campo">
+                  <label for="tarjeta-cuotas">Número de cuotas</label>
+                  <select id="tarjeta-cuotas"></select>
+                </div>
+              </div>
+              <p id="tarjeta-simulacion" class="tarjeta-simulacion" aria-live="polite"></p>
+              <button type="submit" class="boton-principal">Comprar</button>
+            </form>
+
+            <h4>Pagar la tarjeta</h4>
+            <form id="tarjeta-pago-formulario" class="formulario formulario-operacion" novalidate>
+              <div class="campo">
+                <label for="tarjeta-pago-monto">Monto a pagar</label>
+                <input type="text" id="tarjeta-pago-monto" class="campo-monto" inputmode="numeric" autocomplete="off" placeholder="0">
+              </div>
+              <div class="campo">
+                <label for="tarjeta-pago-cuenta">Cuenta desde la que se descuenta</label>
+                <select id="tarjeta-pago-cuenta"></select>
+              </div>
+              <button type="submit" class="boton-principal">Pagar</button>
+            </form>
+
+            <h4>Compras</h4>
+            <ul id="tarjeta-compras" class="movimientos"></ul>
+          </div>
+        </div>
+
+        <!-- Perfil: ver datos y cambiar la contraseña -->
+        <div id="vista-perfil" class="vista oculto">
+          <div class="perfil-encabezado">
+            <img class="perfil-avatar" src="img/avatar.svg" alt="Avatar de usuario">
+            <h3>Mi perfil</h3>
+          </div>
+
+          <dl class="tarjeta-resumen perfil-datos">
+            <div>
+              <dt>Usuario</dt>
+              <dd id="perfil-usuario"></dd>
+            </div>
+            <div>
+              <dt>Documento</dt>
+              <dd id="perfil-documento"></dd>
+            </div>
+            <div>
+              <dt>Correo</dt>
+              <dd id="perfil-correo"></dd>
+            </div>
+            <div>
+              <dt>Celular</dt>
+              <dd id="perfil-celular"></dd>
+            </div>
+          </dl>
+
+          <h4>Editar mis datos</h4>
+          <form id="perfil-datos-formulario" class="formulario" novalidate>
+            <div class="formulario-fila">
+              <div class="campo">
+                <label for="perfil-editar-tipo-documento">Tipo de documento</label>
+                <select id="perfil-editar-tipo-documento">
+                  <option value="cedula">Cédula</option>
+                  <option value="pasaporte">Pasaporte</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="perfil-editar-identificacion">Número de documento</label>
+                <input type="text" id="perfil-editar-identificacion" autocomplete="off">
+              </div>
+            </div>
+            <div class="campo">
+              <label for="perfil-editar-nombre">Nombre completo</label>
+              <input type="text" id="perfil-editar-nombre" autocomplete="off">
+            </div>
+            <div class="formulario-fila">
+              <div class="campo">
+                <label for="perfil-editar-celular">Celular</label>
+                <input type="text" id="perfil-editar-celular" inputmode="numeric" maxlength="10" autocomplete="off">
+              </div>
+              <div class="campo">
+                <label for="perfil-editar-correo">Correo electrónico</label>
+                <input type="email" id="perfil-editar-correo" autocomplete="off">
+              </div>
+            </div>
+            <div class="campo">
+              <label for="perfil-editar-usuario">Nombre de usuario</label>
+              <input type="text" id="perfil-editar-usuario" autocomplete="off">
+              <p class="ayuda">De 4 a 15 caracteres: letras sin tildes, números y guion bajo.</p>
+            </div>
+            <button type="submit" class="boton-principal">Guardar mis datos</button>
+          </form>
+
+          <h4>Cambiar contraseña</h4>
+          <form id="perfil-contrasena-formulario" class="formulario" novalidate>
+            <div class="formulario-fila">
+              <div class="campo">
+                <label for="perfil-contrasena-usuario">Nombre de usuario</label>
+                <input type="text" id="perfil-contrasena-usuario" autocomplete="username">
+              </div>
+              <div class="campo">
+                <label for="perfil-contrasena-actual">Contraseña actual</label>
+                <input type="password" id="perfil-contrasena-actual" autocomplete="current-password">
+              </div>
+            </div>
+            <div class="formulario-fila">
+              <div class="campo">
+                <label for="perfil-contrasena-nueva">Contraseña nueva</label>
+                <input type="password" id="perfil-contrasena-nueva" autocomplete="new-password">
+              </div>
+              <div class="campo">
+                <label for="perfil-contrasena-confirmacion">Confirmar contraseña nueva</label>
+                <input type="password" id="perfil-contrasena-confirmacion" autocomplete="new-password">
+              </div>
+            </div>
+            <p class="ayuda">Mínimo 6 caracteres, con al menos una letra y un número, distinta de la actual. Después de tres intentos fallidos la cuenta se bloquea y se cierra la sesión.</p>
+            <button type="submit" class="boton-principal">Cambiar contraseña</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Administración de clientes (CRUD) ===== -->
+    <section id="seccion-admin" class="seccion oculto">
+      <div class="panel">
+        <div class="panel-cabecera">
+          <h2 class="panel-saludo">Administración</h2>
+          <div class="admin-acciones">
+            <button type="button" id="admin-agregar" class="boton-principal boton-compacto">Agregar cliente</button>
+            <button type="button" id="admin-cerrar-sesion" class="boton-secundario boton-compacto">Cerrar sesión</button>
+          </div>
+        </div>
+
+        <div class="admin-bloque">
+          <h3>Clientes registrados <span id="admin-total" class="admin-total"></span></h3>
+          <div class="admin-tabla-contenedor">
+            <table class="admin-tabla">
+              <thead>
+                <tr>
+                  <th scope="col">Cliente</th>
+                  <th scope="col">Documento</th>
+                  <th scope="col">Contacto</th>
+                  <th scope="col">Cuentas</th>
+                  <th scope="col">Estado</th>
+                  <th scope="col"><span class="oculto-visual">Acciones</span></th>
+                </tr>
+              </thead>
+              <tbody id="admin-clientes"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="admin-edicion" class="admin-bloque oculto">
+          <h3>Editar cliente <span id="admin-edicion-usuario" class="admin-total"></span></h3>
+          <form id="admin-editar-formulario" class="formulario" novalidate>
+            <div class="formulario-fila">
+              <div class="campo">
+                <label for="admin-editar-tipo-documento">Tipo de documento</label>
+                <select id="admin-editar-tipo-documento">
+                  <option value="cedula">Cédula</option>
+                  <option value="pasaporte">Pasaporte</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="admin-editar-identificacion">Número de documento</label>
+                <input type="text" id="admin-editar-identificacion" autocomplete="off">
+              </div>
+            </div>
+            <div class="campo">
+              <label for="admin-editar-nombre">Nombre completo</label>
+              <input type="text" id="admin-editar-nombre" autocomplete="off">
+            </div>
+            <div class="formulario-fila">
+              <div class="campo">
+                <label for="admin-editar-celular">Celular</label>
+                <input type="text" id="admin-editar-celular" inputmode="numeric" maxlength="10" autocomplete="off">
+              </div>
+              <div class="campo">
+                <label for="admin-editar-correo">Correo electrónico</label>
+                <input type="email" id="admin-editar-correo" autocomplete="off">
+              </div>
+            </div>
+            <div class="campo">
+              <label for="admin-editar-usuario">Nombre de usuario</label>
+              <input type="text" id="admin-editar-usuario" autocomplete="off">
+              <p class="ayuda">De 4 a 15 caracteres: letras sin tildes, números y guion bajo.</p>
+            </div>
+            <div class="admin-acciones">
+              <button type="submit" class="boton-principal">Guardar cambios</button>
+              <button type="button" id="admin-editar-cancelar" class="boton-secundario">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="pie">
+    <div class="pie-contenido">
+      <div class="pie-marca">
+        <span class="marca-nombre">DigiBank</span>
+        <p>Medellín, Colombia. Atención al cliente de lunes a viernes, de 8:00 a.&nbsp;m. a 6:00 p.&nbsp;m.</p>
+      </div>
+      <nav class="pie-redes" aria-label="Redes sociales">
+        <a href="#" rel="noopener">Instagram</a>
+        <a href="#" rel="noopener">Facebook</a>
+        <a href="#" rel="noopener">LinkedIn</a>
+        <a href="#" rel="noopener">X</a>
+      </nav>
+    </div>
+    <p class="pie-legal">© 2026 DigiBank. Proyecto académico de CESDE: banco simulado que no maneja dinero real.</p>
+  </footer>
+
+  <!-- ===== Scripts: el ORDEN importa (ver contrato) ===== -->
+  <script src="js/utilidades.js"></script>
+  <script src="js/clases/Cuenta.js"></script>
+  <script src="js/clases/CuentaAhorros.js"></script>
+  <script src="js/clases/CuentaCorriente.js"></script>
+  <script src="js/clases/TarjetaCredito.js"></script>
+  <script src="js/clases/Usuario.js"></script>
+  <script src="js/clases/Administrador.js"></script>
+  <script src="js/clases/Cliente.js"></script>
+  <script src="js/clases/Banco.js"></script>
+  <script src="js/interfaz/registro.js"></script>
+  <script src="js/interfaz/iniciarSesion.js"></script>
+  <script src="js/interfaz/operaciones.js"></script>
+  <script src="js/interfaz/consultas.js"></script>
+  <script src="js/interfaz/tarjeta.js"></script>
+  <script src="js/interfaz/perfil.js"></script>
+  <script src="js/interfaz/administracion.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
