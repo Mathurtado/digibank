@@ -679,6 +679,23 @@ input.campo-monto {
   font-size: var(--t-pequeno);
 }
 
+.recuperacion-contenido {
+  justify-content: center;
+}
+
+.recuperacion-codigo-demo {
+  padding: var(--e-3) var(--e-4);
+  border-radius: var(--radio);
+  background: #f3f6f2;
+  border-left: 3px solid var(--laton);
+  color: var(--verde);
+  font-weight: 600;
+}
+
+.recuperacion-volver {
+  align-self: center;
+}
+
 /* ---------- 9. Panel de transacciones ---------- */
 
 .panel {

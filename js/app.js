@@ -161,6 +161,7 @@ inicializarNavegacion();
 inicializarConfirmacion();
 inicializarRegistro();     // interfaz/registro.js
 inicializarLogin();        // interfaz/iniciarSesion.js
+inicializarRecuperacionContrasena(); // interfaz/recuperarContrasena.js
 inicializarOperaciones();  // interfaz/operaciones.js
 inicializarConsultas();    // interfaz/consultas.js
 inicializarTarjeta();      // interfaz/tarjeta.js

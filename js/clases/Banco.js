@@ -9,6 +9,10 @@ class Banco {
   #clienteActivo;       // Cliente que inició sesión, o null
   #administrador;       // Único administrador (usuario y clave fijos)
   #administradorActivo; // true si el que inició sesión es el administrador
+  #clienteRecuperacion;
+  #codigoRecuperacion;
+  #codigoRecuperacionExpira;
+  #intentosRecuperacion;
 
   constructor() {
     this.#clientes = [];
@@ -16,6 +20,10 @@ class Banco {
     this.#clienteActivo = null;
     this.#administrador = new Administrador();
     this.#administradorActivo = false;
+    this.#clienteRecuperacion = null;
+    this.#codigoRecuperacion = null;
+    this.#codigoRecuperacionExpira = 0;
+    this.#intentosRecuperacion = 0;
   }
 
   // Solo lectura: la sesión solo se abre con iniciarSesion() y se cierra
@@ -384,6 +392,84 @@ class Banco {
     cliente.reiniciarIntentos();
     this.guardar(); // para que el cambio siga aunque se recargue la página
     return crearRespuesta("exito", "Tu contraseña se cambió correctamente.");
+  }
+
+  // ---------- Recuperación de contraseña ----------
+
+  solicitarRecuperacion(usuario, correo) {
+    const textoUsuario = String(usuario || "").trim().toLowerCase();
+    const textoCorreo = String(correo || "").trim().toLowerCase();
+    const cliente = this.#clientes.find((item) =>
+      item.usuario === textoUsuario && item.correo === textoCorreo
+    );
+
+    this.cancelarRecuperacion();
+    if (cliente === null || cliente === undefined) {
+      return crearRespuesta("error", "El usuario y el correo no coinciden con una cuenta registrada.");
+    }
+
+    const codigo = String(Math.floor(100000 + Math.random() * 900000));
+    this.#clienteRecuperacion = cliente;
+    this.#codigoRecuperacion = codigo;
+    this.#codigoRecuperacionExpira = Date.now() + 10 * 60 * 1000;
+    this.#intentosRecuperacion = 0;
+
+    // En un proyecto real el código se enviaría por correo. Aquí se muestra
+    // en pantalla para permitir probar el flujo sin backend.
+    return crearRespuesta("exito", "Código de recuperación generado.", { codigo });
+  }
+
+  verificarCodigoRecuperacion(codigo) {
+    if (this.#clienteRecuperacion === null || this.#codigoRecuperacion === null) {
+      return crearRespuesta("error", "Solicita un código de recuperación primero.");
+    }
+    if (Date.now() > this.#codigoRecuperacionExpira) {
+      this.cancelarRecuperacion();
+      return crearRespuesta("error", "El código expiró. Solicita uno nuevo.");
+    }
+    if (String(codigo || "").trim() !== this.#codigoRecuperacion) {
+      this.#intentosRecuperacion++;
+      if (this.#intentosRecuperacion >= MAX_INTENTOS) {
+        this.cancelarRecuperacion();
+        return crearRespuesta("error", "Demasiados intentos. Solicita un código nuevo.");
+      }
+      return crearRespuesta(
+        "error",
+        "Código incorrecto. Intentos restantes: " + (MAX_INTENTOS - this.#intentosRecuperacion) + "."
+      );
+    }
+    return crearRespuesta("exito", "Código verificado.");
+  }
+
+  restablecerContrasenaRecuperada(contrasena, confirmacion) {
+    if (this.#clienteRecuperacion === null || this.#codigoRecuperacion === null) {
+      return crearRespuesta("error", "Verifica primero el código de recuperación.");
+    }
+    if (Date.now() > this.#codigoRecuperacionExpira) {
+      this.cancelarRecuperacion();
+      return crearRespuesta("error", "El código expiró. Solicita uno nuevo.");
+    }
+
+    const nueva = String(contrasena || "");
+    const error = this.#validarContrasena(nueva, String(confirmacion || ""));
+    if (error !== null) {
+      return error;
+    }
+    if (this.#clienteRecuperacion.verificarContrasena(nueva)) {
+      return crearRespuesta("error", "La contraseña nueva debe ser distinta de la actual.");
+    }
+
+    this.#clienteRecuperacion.restablecerContrasena(nueva);
+    this.guardar();
+    this.cancelarRecuperacion();
+    return crearRespuesta("exito", "Tu contraseña se restableció correctamente.");
+  }
+
+  cancelarRecuperacion() {
+    this.#clienteRecuperacion = null;
+    this.#codigoRecuperacion = null;
+    this.#codigoRecuperacionExpira = 0;
+    this.#intentosRecuperacion = 0;
   }
 
   // ---------- Inicio de sesión (Mateo, rama 6-iniciar-sesion) ----------
