@@ -49,6 +49,49 @@ function ocultarMensaje() {
   caja.className = "mensaje oculto";
 }
 
+// ---------- Confirmación de operaciones ----------
+
+let operacionPendiente = null;
+
+function pedirConfirmacion(titulo, detalle, aceptar = "Confirmar", alConfirmar) {
+  const modal = document.getElementById("confirmacion-operacion");
+  document.getElementById("confirmacion-titulo").textContent = titulo;
+  document.getElementById("confirmacion-detalle").textContent = detalle;
+  document.getElementById("confirmacion-aceptar").textContent = aceptar;
+  operacionPendiente = alConfirmar;
+  modal.classList.remove("oculto");
+  document.body.classList.add("confirmacion-abierta");
+  document.getElementById("confirmacion-cancelar").focus();
+}
+
+function cerrarConfirmacion() {
+  document.getElementById("confirmacion-operacion").classList.add("oculto");
+  document.body.classList.remove("confirmacion-abierta");
+  operacionPendiente = null;
+}
+
+function inicializarConfirmacion() {
+  document.getElementById("confirmacion-cancelar").addEventListener("click", cerrarConfirmacion);
+  document.getElementById("confirmacion-aceptar").addEventListener("click", () => {
+    if (operacionPendiente === null) {
+      return;
+    }
+    const ejecutarOperacion = operacionPendiente;
+    cerrarConfirmacion();
+    ejecutarOperacion();
+  });
+  document.getElementById("confirmacion-operacion").addEventListener("click", (evento) => {
+    if (evento.target === evento.currentTarget) {
+      cerrarConfirmacion();
+    }
+  });
+  document.addEventListener("keydown", (evento) => {
+    if (evento.key === "Escape" && !document.getElementById("confirmacion-operacion").classList.contains("oculto")) {
+      cerrarConfirmacion();
+    }
+  });
+}
+
 // ---------- Panel ----------
 
 // Llena el panel con los datos del cliente activo. Se llama al iniciar sesión.
@@ -115,8 +158,10 @@ function inicializarNavegacion() {
 // ---------- Arranque ----------
 
 inicializarNavegacion();
+inicializarConfirmacion();
 inicializarRegistro();     // interfaz/registro.js
 inicializarLogin();        // interfaz/iniciarSesion.js
+inicializarRecuperacionContrasena(); // interfaz/recuperarContrasena.js
 inicializarOperaciones();  // interfaz/operaciones.js
 inicializarConsultas();    // interfaz/consultas.js
 inicializarTarjeta();      // interfaz/tarjeta.js

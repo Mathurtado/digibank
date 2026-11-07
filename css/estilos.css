@@ -279,6 +279,56 @@ body:has(#seccion-admin:not(.oculto)) #menu-publico {
   color: var(--advertencia);
 }
 
+/* ---------- Confirmación de operaciones ---------- */
+
+.confirmacion-abierta {
+  overflow: hidden;
+}
+
+.confirmacion {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: var(--e-5);
+  background: rgba(15, 46, 38, 0.68);
+}
+
+.confirmacion-contenido {
+  width: min(100%, 32rem);
+  padding: var(--e-6);
+  border-top: 4px solid var(--laton);
+  border-radius: var(--radio-grande);
+  background: var(--papel);
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.25);
+}
+
+.confirmacion-etiqueta {
+  margin-bottom: var(--e-2);
+  color: var(--laton);
+  font-size: var(--t-pequeno);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.confirmacion-contenido h2 {
+  margin-bottom: var(--e-3);
+  font-size: var(--t-grande);
+}
+
+#confirmacion-detalle {
+  color: var(--pizarra);
+}
+
+.confirmacion-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--e-3);
+  margin-top: var(--e-6);
+}
+
 /* ---------- 6. Página de inicio ---------- */
 
 .portada {
@@ -627,6 +677,23 @@ input.campo-monto {
   color: var(--advertencia);
   font-weight: 600;
   font-size: var(--t-pequeno);
+}
+
+.recuperacion-contenido {
+  justify-content: center;
+}
+
+.recuperacion-codigo-demo {
+  padding: var(--e-3) var(--e-4);
+  border-radius: var(--radio);
+  background: #f3f6f2;
+  border-left: 3px solid var(--laton);
+  color: var(--verde);
+  font-weight: 600;
+}
+
+.recuperacion-volver {
+  align-self: center;
 }
 
 /* ---------- 9. Panel de transacciones ---------- */

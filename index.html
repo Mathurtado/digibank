@@ -219,10 +219,61 @@
 
           <button type="submit" class="boton-principal boton-ancho">Entrar</button>
           <p class="formulario-alterno">
+            <button type="button" id="login-recuperar" class="enlace">¿Olvidaste tu contraseña?</button>
+          </p>
+          <p class="formulario-alterno">
             ¿Todavía no eres cliente?
             <button type="button" class="enlace" data-ir-a="seccion-registro">Abre tu cuenta</button>
           </p>
         </form>
+      </div>
+    </section>
+
+    <!-- ===== Recuperación de contraseña ===== -->
+    <section id="seccion-recuperacion" class="seccion oculto">
+      <div class="acceso acceso-recuperacion">
+        <aside class="acceso-marca">
+          <h2>Recupera tu acceso</h2>
+          <p>Verifica tu identidad con los datos registrados antes de crear una contraseña nueva.</p>
+        </aside>
+
+        <div class="formulario recuperacion-contenido">
+          <form id="recuperacion-solicitud-formulario" class="formulario">
+            <div class="campo">
+              <label for="recuperacion-usuario">Nombre de usuario</label>
+              <input type="text" id="recuperacion-usuario" autocomplete="username">
+            </div>
+            <div class="campo">
+              <label for="recuperacion-correo">Correo registrado</label>
+              <input type="email" id="recuperacion-correo" autocomplete="email">
+            </div>
+            <button type="submit" class="boton-principal boton-ancho">Enviar código</button>
+          </form>
+
+          <form id="recuperacion-codigo-formulario" class="formulario oculto">
+            <p id="recuperacion-codigo-demo" class="ayuda recuperacion-codigo-demo"></p>
+            <div class="campo">
+              <label for="recuperacion-codigo">Código de verificación</label>
+              <input type="text" id="recuperacion-codigo" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
+            </div>
+            <button type="submit" class="boton-principal boton-ancho">Verificar código</button>
+          </form>
+
+          <form id="recuperacion-clave-formulario" class="formulario oculto">
+            <div class="campo">
+              <label for="recuperacion-contrasena">Contraseña nueva</label>
+              <input type="password" id="recuperacion-contrasena" autocomplete="new-password">
+            </div>
+            <div class="campo">
+              <label for="recuperacion-confirmacion">Confirmar contraseña</label>
+              <input type="password" id="recuperacion-confirmacion" autocomplete="new-password">
+            </div>
+            <p class="ayuda">Mínimo 6 caracteres, con al menos una letra y un número.</p>
+            <button type="submit" class="boton-principal boton-ancho">Cambiar contraseña</button>
+          </form>
+
+          <button type="button" id="recuperacion-volver" class="enlace recuperacion-volver">Volver al inicio de sesión</button>
+        </div>
       </div>
     </section>
 
@@ -550,6 +601,18 @@
     <p class="pie-legal">© 2026 DigiBank. Proyecto académico de CESDE: banco simulado que no maneja dinero real.</p>
   </footer>
 
+  <div id="confirmacion-operacion" class="confirmacion oculto" role="dialog" aria-modal="true" aria-labelledby="confirmacion-titulo" aria-describedby="confirmacion-detalle">
+    <div class="confirmacion-contenido">
+      <p class="confirmacion-etiqueta">DigiBank</p>
+      <h2 id="confirmacion-titulo">Confirmar operación</h2>
+      <p id="confirmacion-detalle"></p>
+      <div class="confirmacion-acciones">
+        <button type="button" id="confirmacion-cancelar" class="boton-secundario">Cancelar</button>
+        <button type="button" id="confirmacion-aceptar" class="boton-principal">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== Scripts: el ORDEN importa (ver contrato) ===== -->
   <script src="js/utilidades.js"></script>
   <script src="js/clases/Cuenta.js"></script>
@@ -562,6 +625,7 @@
   <script src="js/clases/Banco.js"></script>
   <script src="js/interfaz/registro.js"></script>
   <script src="js/interfaz/iniciarSesion.js"></script>
+  <script src="js/interfaz/recuperarContrasena.js"></script>
   <script src="js/interfaz/operaciones.js"></script>
   <script src="js/interfaz/consultas.js"></script>
   <script src="js/interfaz/tarjeta.js"></script>

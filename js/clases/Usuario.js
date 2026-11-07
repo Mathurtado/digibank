@@ -53,6 +53,12 @@ class Usuario {
     return true;
   }
 
+  // Solo Banco puede solicitarlo después de verificar el código de recuperación.
+  restablecerContrasena(nueva) {
+    this.#contrasena = nueva;
+    this.reiniciarIntentos();
+  }
+
   // Cambia el nombre de usuario. Banco ya revisó que sea válido y único.
   cambiarUsuario(nuevo) {
     this.#usuario = nuevo;

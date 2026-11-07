@@ -44,6 +44,25 @@ function inicializarOperaciones() {
 
     const campo = document.getElementById("retirar-monto");
     const monto = convertirMonto(campo.value);
+    if (!Number.isInteger(monto) || monto <= 0) {
+      mostrarMensaje(cuenta.retirar(monto));
+      return;
+    }
+    const limiteRetiro = cuenta.limiteRetiro() + cuenta.calcularInteresRetiro(monto);
+    if (monto > limiteRetiro) {
+      mostrarMensaje(crearRespuesta(
+        "error",
+        "Saldo insuficiente. Puedes retirar hasta " + formatearMoneda(Math.max(limiteRetiro, 0)) + "."
+      ));
+      return;
+    }
+
+    pedirConfirmacion(
+      "Confirmar retiro",
+      "Retirarás " + formatearMoneda(monto) + " de tu " + nombreProducto(cuenta.tipo) +
+        " Nº " + cuenta.numero + ".",
+      "Confirmar retiro",
+      () => {
     const respuesta = cuenta.retirar(monto);
 
     mostrarMensaje(respuesta);
@@ -51,6 +70,8 @@ function inicializarOperaciones() {
       campo.value = "";
       banco.guardar();
     }
+      }
+    );
   });
 
   document.getElementById("transferir-formulario").addEventListener("submit", (evento) => {
@@ -79,23 +100,35 @@ function inicializarOperaciones() {
       return;
     }
 
-    const tipoCuenta = nombreProducto(destino.datos.tipoCuenta);
-    const confirmacion = window.confirm(
-      "Vas a transferir dinero a " + destino.datos.nombreDestinatario +
-      " (" + tipoCuenta + " Nº " + destino.datos.numero + "). ¿Deseas continuar?"
-    );
-    if (!confirmacion) {
+    const monto = convertirMonto(campoMonto.value);
+    if (!Number.isInteger(monto) || monto <= 0) {
+      mostrarMensaje(crearRespuesta("error", "Ingresa un monto válido mayor que cero."));
+      return;
+    }
+    if (monto > cuenta.limiteRetiro()) {
+      mostrarMensaje(crearRespuesta(
+        "error",
+        "Saldo insuficiente. Puedes transferir hasta " + formatearMoneda(Math.max(cuenta.limiteRetiro(), 0)) + "."
+      ));
       return;
     }
 
-    const respuesta = banco.transferir(cuenta, campoNumero.value, convertirMonto(campoMonto.value));
-
-    mostrarMensaje(respuesta);
-    if (respuesta.tipo === "exito") {
-      campoNumero.value = "";
-      campoMonto.value = "";
-      vistaDestinatario.textContent = "";
-    }
+    const tipoCuenta = nombreProducto(destino.datos.tipoCuenta);
+    pedirConfirmacion(
+      "Confirmar transferencia",
+      "Enviarás " + formatearMoneda(monto) + " a " + destino.datos.nombreDestinatario +
+        " (" + tipoCuenta + " Nº " + destino.datos.numero + ").",
+      "Confirmar transferencia",
+      () => {
+        const respuesta = banco.transferir(cuenta, campoNumero.value, monto);
+        mostrarMensaje(respuesta);
+        if (respuesta.tipo === "exito") {
+          campoNumero.value = "";
+          campoMonto.value = "";
+          vistaDestinatario.textContent = "";
+        }
+      }
+    );
   });
 
   document.getElementById("transferir-numero").addEventListener("input", (evento) => {

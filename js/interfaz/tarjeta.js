@@ -118,19 +118,31 @@ function inicializarTarjeta() {
       return;
     }
 
-    const respuesta = tarjeta.comprar(
-      convertirMonto(campoMonto.value),
-      Number(selectorCuotas.value),
-      campoDescripcion.value
-    );
-    mostrarMensaje(respuesta);
-    if (respuesta.tipo === "exito") {
-      campoMonto.value = "";
-      campoDescripcion.value = "";
-      textoSimulacion.textContent = "";
-      banco.guardar();
+    const monto = convertirMonto(campoMonto.value);
+    const cuotas = Number(selectorCuotas.value);
+    const simulacion = tarjeta.simularCompra(monto, cuotas);
+    if (simulacion.tipo !== "exito") {
+      mostrarMensaje(simulacion);
+      return;
     }
-    mostrarTarjeta();
+
+    pedirConfirmacion(
+      "Confirmar compra",
+      "Compra de " + formatearMoneda(monto) + " en " + cuotas + " " + (cuotas === 1 ? "cuota" : "cuotas") +
+        ", con una cuota estimada de " + formatearMoneda(simulacion.datos.cuotaMensual) + ".",
+      "Confirmar compra",
+      () => {
+        const respuesta = tarjeta.comprar(monto, cuotas, campoDescripcion.value);
+        mostrarMensaje(respuesta);
+        if (respuesta.tipo === "exito") {
+          campoMonto.value = "";
+          campoDescripcion.value = "";
+          textoSimulacion.textContent = "";
+          banco.guardar();
+        }
+        mostrarTarjeta();
+      }
+    );
   });
 
   // Pagar
@@ -163,20 +175,28 @@ function inicializarTarjeta() {
       return;
     }
 
-    const respuestaPrincipal = cuentaPrincipal.retirar(monto);
-    if (respuestaPrincipal.tipo !== "exito") {
-      mostrarMensaje(respuestaPrincipal);
-      return;
-    }
+    pedirConfirmacion(
+      "Confirmar pago de tarjeta",
+      "Pagarás " + formatearMoneda(monto) + " desde tu " + nombreProducto(cuentaPrincipal.tipo) +
+        " Nº " + cuentaPrincipal.numero + ".",
+      "Confirmar pago",
+      () => {
+        const respuestaPrincipal = cuentaPrincipal.retirar(monto);
+        if (respuestaPrincipal.tipo !== "exito") {
+          mostrarMensaje(respuestaPrincipal);
+          return;
+        }
 
-    const respuesta = tarjeta.consignar(monto);
-    mostrarMensaje(respuesta);
-    if (respuesta.tipo === "exito") {
-      campoPago.value = "";
-      banco.guardar();
-    }
-    actualizarSaldo();
-    mostrarTarjeta();
+        const respuesta = tarjeta.consignar(monto);
+        mostrarMensaje(respuesta);
+        if (respuesta.tipo === "exito") {
+          campoPago.value = "";
+          banco.guardar();
+        }
+        actualizarSaldo();
+        mostrarTarjeta();
+      }
+    );
   });
 
   // Actualizar cada vez que se abre la vista
