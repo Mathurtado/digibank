@@ -162,7 +162,8 @@ function inicializarTarjeta() {
       mostrarMensaje(tarjeta.consignar(monto));
       return;
     }
-    if (cuentaPrincipal === null) {
+    // .find() devuelve undefined cuando no encuentra una cuenta principal.
+    if (!cuentaPrincipal) {
       mostrarMensaje(crearRespuesta("error", "No tienes una cuenta principal para realizar el pago."));
       return;
     }
