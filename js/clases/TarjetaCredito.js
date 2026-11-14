@@ -163,11 +163,15 @@ class TarjetaCredito extends Cuenta {
     return Math.ceil(cuota);
   }
 
-  // Suma de las cuotas mensuales de todas las compras.
-  // LIMITACIÓN: no descuenta cuotas ya pagadas, porque todavía no hay
-  // manejo de meses. Sirve como pago mensual estimado.
+  // Ajusta la estimación según la proporción de deuda que queda pendiente.
   pagoMensualEstimado() {
-    return this.#compras.reduce((total, compra) => total + compra.cuotaMensual, 0);
+    const deudaOriginal = this.#compras.reduce((total, compra) => total + compra.monto, 0);
+    if (this.deuda === 0 || deudaOriginal === 0) {
+      return 0;
+    }
+
+    const pagoMensualOriginal = this.#compras.reduce((total, compra) => total + compra.cuotaMensual, 0);
+    return Math.ceil(pagoMensualOriginal * Math.min(this.deuda / deudaOriginal, 1));
   }
 
   // Copia de las compras, de la más reciente a la más antigua.

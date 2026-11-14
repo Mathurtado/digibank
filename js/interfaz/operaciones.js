@@ -21,6 +21,14 @@ function inicializarOperaciones() {
       mostrarMensaje(crearRespuesta("error", "Inicia sesión para hacer operaciones."));
       return;
     }
+    // Los pagos de tarjeta deben descontarse de una cuenta principal.
+    if (cuenta.tipo === TIPO_TARJETA) {
+      mostrarMensaje(crearRespuesta(
+        "error",
+        "Los pagos de la tarjeta se hacen desde la vista Tarjeta, eligiendo la cuenta de ahorros o corriente de la que se descuenta."
+      ));
+      return;
+    }
 
     const campo = document.getElementById("consignar-monto");
     const monto = convertirMonto(campo.value);
